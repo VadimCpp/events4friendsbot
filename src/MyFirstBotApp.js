@@ -43,18 +43,20 @@ class MyFirstBotApp {
         /**
          * @type {string}
          */
-        let messageText =
-            'Hello, ' + this._getName(msg) + "\n\n" +
-            'This is the starter template for other bots built with <b>node-telegram-bot-api</b>. ' +
-            'Visit my website ' + this._myWebsite + ' to see bots built on this template.\n\n' +
-            'Bots cooked:\n';
+        let messageText = msg.text;
 
-        for (let i = 0; i < this._botsBasedOnThisTemplate.length; i++)
-            messageText += this._botsBasedOnThisTemplate[i] + ';\n';
+        if (messageText === '/start') {
+            messageText =
+                'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
+                'Этот бот создан специально для нашего уютненького телеграм чата @events4friends, ' + 
+                'в котором мы обсуждаем события, делимся классными фоточками и просто общаемся. ' +
+                'Если Вам интересны технические детали, что делает этот бот и почему он появился, ' +
+                'читайте [пост](https://frontend-basics.blogspot.com/2019/08/events4friendsbot.html).\n\n' +
+                'Приглашаю Вас также посетить сайт [events4friend.ru](https://events4friends.ru/) ' + 
+                'и ознакомиться с предстоящими событиями.';
+        }
 
-        messageText += '\nEnjoy cooking with <a href="https://github.com/VadimCpp/myfirstbotbot">this template</a>!';
-
-        bot.sendMessage(msg.chat.id, msg.text, {                
+        bot.sendMessage(msg.chat.id, messageText, {                
             parse_mode: "Markdown",
             disable_web_page_preview: true,                        
         });
