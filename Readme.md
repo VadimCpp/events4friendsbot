@@ -2,7 +2,7 @@
 
 > Telegram bot: [https://t.me/events4friendsbot](https://t.me/events4friendsbot)
 
-Этот бот создан специально для нашего уютненького общественного пространство events4friends.
+Этот бот создан специально для нашего уютненького общественного пространства [events4friends](https://t.me/events4friends).
 
 TODO: дополнить описание
 
