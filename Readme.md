@@ -1,10 +1,12 @@
-# myfirstbotbot
+# events4friendsbot
 
-> Telegram bot: [https://t.me/myfirstbotbot](https://t.me/myfirstbotbot)
+> Telegram bot: [https://t.me/events4friendsbot](https://t.me/events4friendsbot)
 
-This is the starter template for other bots built with [node-telegram-bot-api](https://github.com/yagop/node-telegram-bot-api)
+Этот бот создан специально для нашего уютненького общественного пространство events4friends.
 
-## Инстукция
+TODO: дополнить описание
 
-Инструкция доступна по ссылке:
-[webdev2018](https://webdev2018.blogspot.com/2018/09/hello-world-bot.html)
+## Стартовый шаблон
+
+Этот бот создан из стартового шаблона:
+[https://webdev2018.blogspot.com/2018/09/hello-world-bot.html](https://webdev2018.blogspot.com/2018/09/hello-world-bot.html)
