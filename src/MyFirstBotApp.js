@@ -54,8 +54,8 @@ class MyFirstBotApp {
 
         messageText += '\nEnjoy cooking with <a href="https://github.com/VadimCpp/myfirstbotbot">this template</a>!';
 
-        bot.sendMessage(msg.chat.id, messageText, {                
-            parse_mode: "HTML",
+        bot.sendMessage(msg.chat.id, msg.text, {                
+            parse_mode: "Markdown",
             disable_web_page_preview: true,                        
         });
     }
