@@ -12,17 +12,6 @@ class MyFirstBotApp {
          * @private
          */
         this._myWebsite = 'vadimcpp.ru';
-
-        /**
-         * @type {Array}
-         * @private
-         */
-        this._botsBasedOnThisTemplate = [
-            '@gdgcensorbot',
-            '@horoshoposidelibot',
-            '@fxswap_bot',
-            '@gdgdevbot'
-        ];
     }
 
     /**
