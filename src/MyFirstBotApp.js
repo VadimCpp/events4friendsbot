@@ -17,6 +17,12 @@ class MyFirstBotApp {
          */
         this._myWebsite = 'vadimcpp.ru';
 
+        this._pinnedMessageIdTest = null; // @frontendBasics
+        this._pinnedMessageIdProd = null; // @events4friends
+
+        this._chatIdTest = '-1001496443397'; // @frontendBasics
+        // this._chatIdProd = '-1001496443397'; // @events4friends
+
         const firebaseServiceAccount = {
             "type": "service_account",
             "project_id": "events4friends",
@@ -155,6 +161,39 @@ class MyFirstBotApp {
     }
 
     /**
+     * @param {Object} msg
+     * @param {Object} bot
+     * @private
+     */
+    _sendMessageToChatAndPin(bot, aCallback) {
+        this._getInfo((aMessage) => {
+            bot.sendMessage(this._chatIdTest, aMessage, {                
+                parse_mode: "Markdown",
+                disable_web_page_preview: true,                        
+            })
+            .then((data) => {
+                console.log('Message has sent');
+                if (data && data.message_id) {
+                    bot.pinChatMessage(this._chatIdTest, data.message_id, {
+                        disable_notification: true
+                    })
+                    .then(() => {
+                        console.log('Message has pinned, save pinned message ID:', data.message_id);
+                        this._pinnedMessageIdTest = data.message_id
+                        aCallback()
+                    })
+                    .catch((error) => {
+                        console.log('Error pinning message:', error);
+                    });
+                }
+            })
+            .catch((error) => {
+                console.log('Error sending message:', error);
+            });
+        })
+    }
+
+    /**
      * Main event handler
      *
      * @param {Object} msg
@@ -189,6 +228,10 @@ class MyFirstBotApp {
                         parse_mode: "Markdown",
                         disable_web_page_preview: true,                        
                     });                 
+                })
+            } else if (messageText === '/update') {
+                this._sendMessageToChatAndPin(bot, () => {
+                    console.log('sendMessageToChatAndPin callback')
                 })
             } else {
                 messageText =
