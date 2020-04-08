@@ -161,8 +161,8 @@ class MyFirstBotApp {
     }
 
     /**
-     * @param {Object} msg
      * @param {Object} bot
+     * @param {function} aCallback
      * @private
      */
     _sendMessageToChatAndPin(bot, aCallback) {
@@ -189,6 +189,33 @@ class MyFirstBotApp {
             })
             .catch((error) => {
                 console.log('Error sending message:', error);
+            });
+        })
+    }
+
+    /**
+     * @param {Object} bot
+     * @param {function} aCallback
+     * @private
+     */
+    _updatePinnedMessage(bot, aCallback) {
+        this._getInfo((aMessage) => {
+            bot.editMessageText(aMessage, {                
+                chat_id: this._chatId,
+                message_id: this._pinnedMessageId,
+                text: aMessage,
+                parse_mode: "Markdown",
+                disable_web_page_preview: true, 
+            })
+            .then(() => {
+                console.log('Message has edited');
+                aCallback();
+            })
+            .catch((error) => {
+                console.log('Error editing message:', error);
+                //
+                // TODO:
+                //
             });
         })
     }
@@ -230,9 +257,17 @@ class MyFirstBotApp {
                     });                 
                 })
             } else if (messageText === '/update') {
-                this._sendMessageToChatAndPin(bot, () => {
-                    console.log('sendMessageToChatAndPin callback')
-                })
+                if (this._pinnedMessageId) {
+                    console.log('There is pinned message: ', this._pinnedMessageId)
+                    this._updatePinnedMessage(bot, () => {
+                        console.log('updatePinnedMessage callback')
+                    })
+                } else {
+                    console.log('No pinned message found, create new one...')
+                    this._sendMessageToChatAndPin(bot, () => {
+                        console.log('sendMessageToChatAndPin callback')
+                    })    
+                }
             } else {
                 messageText =
                     'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
