@@ -1,3 +1,6 @@
+const admin = require('firebase-admin');
+const firebaseServiceAccount = require('./config/firebase-adminsdk.json');
+
 class MyFirstBotApp {
 
     /**
@@ -12,6 +15,18 @@ class MyFirstBotApp {
          * @private
          */
         this._myWebsite = 'vadimcpp.ru';
+
+        
+        /**
+         * @type {Object}
+         * @private
+         */
+        this._firebaseApp = admin.initializeApp({
+            credential: admin.credential.cert(firebaseServiceAccount),
+            databaseURL: process.env.DATABASE_URL
+        }, 'events4friends-bot');
+
+        console.log(' 2️⃣  [MyFirstBotApp]: Connected as ' + this._firebaseApp.name);        
     }
 
     /**
