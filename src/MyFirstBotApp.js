@@ -133,6 +133,17 @@ class MyFirstBotApp {
     }
 
     /**
+     * У личных чатов положительные ID
+     *
+     * @param {Object} msg
+     * @return {boolean}
+     * @private
+     */
+    _isPrivateMsg(msg) {
+        return msg.chat.id > 0;
+    }
+
+    /**
      * Main event handler
      *
      * @param {Object} msg
@@ -140,46 +151,46 @@ class MyFirstBotApp {
      * @public
      */
     handleMessage(msg, bot) {
-
-        //
-        // TODO: view logs on your server
-        //
         console.log('');
         console.log(JSON.stringify(msg));
 
-        /**
-         * @type {string}
-         */
-        let messageText = msg.text;
+        if (this._isPrivateMsg(msg)) {
+            /**
+             * @type {string}
+             */
+            let messageText = msg.text;
 
-        if (messageText === '/start') {
-            messageText =
-                'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
-                'Этот бот создан для телеграм чата @events4friends. ' + 
-                'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
-                'и обновляет информацию в закрепленном сообщении чата.\n\n' +
-                'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-            bot.sendMessage(msg.chat.id, messageText, {                
-                parse_mode: "Markdown",
-                disable_web_page_preview: true,                        
-            });                
-    
-        } else if (messageText === '/info') {
-            this._getInfo((aMessage) => {
-                bot.sendMessage(msg.chat.id, aMessage, {                
+            if (messageText === '/start') {
+                messageText =
+                    'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
+                    'Этот бот создан для телеграм чата @events4friends. ' + 
+                    'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
+                    'и обновляет информацию в закрепленном сообщении чата.\n\n' +
+                    'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
+                bot.sendMessage(msg.chat.id, messageText, {                
                     parse_mode: "Markdown",
                     disable_web_page_preview: true,                        
-                });                 
-            })
+                });                
+        
+            } else if (messageText === '/info') {
+                this._getInfo((aMessage) => {
+                    bot.sendMessage(msg.chat.id, aMessage, {                
+                        parse_mode: "Markdown",
+                        disable_web_page_preview: true,                        
+                    });                 
+                })
+            } else {
+                messageText =
+                    'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
+                    'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
+                bot.sendMessage(msg.chat.id, messageText, {                
+                    parse_mode: "Markdown",
+                    disable_web_page_preview: true,                        
+                });                
+            }
         } else {
-            messageText =
-                'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
-                'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-            bot.sendMessage(msg.chat.id, messageText, {                
-                parse_mode: "Markdown",
-                disable_web_page_preview: true,                        
-            });                
-        }
+            console.log('Ignore group chats');               
+        }        
     }
 
     /**
