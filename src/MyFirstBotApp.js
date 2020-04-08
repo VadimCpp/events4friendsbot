@@ -106,11 +106,12 @@ class MyFirstBotApp {
                 
                 message += that._formatEvents(events);
 
-                if (services.length > 0) {
-                    message += `Услуги: ${services.length}`;
-                } else {
-                    message += 'Услуг  нет'
-                }
+                // if (services.length > 0) {
+                //     message += `Услуги: ${services.length}`;
+                // } else {
+                //     message += 'Услуг  нет'
+                // }
+                message += `Услуги:\n[https://events4friends.ru/#/services](https://events4friends.ru/#/services)`;
                 
                 aCallback(message)
             })
