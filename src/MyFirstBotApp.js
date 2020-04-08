@@ -37,12 +37,10 @@ class MyFirstBotApp {
         if (messageText === '/start') {
             messageText =
                 'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
-                'Этот бот создан специально для нашего уютненького телеграм чата @events4friends, ' + 
-                'в котором мы обсуждаем события, делимся классными фоточками и просто общаемся. ' +
-                'Если Вам интересны технические детали, что делает этот бот и почему он появился, ' +
-                'читайте [пост](https://frontend-basics.blogspot.com/2019/08/events4friendsbot.html).\n\n' +
-                'Приглашаю Вас также посетить сайт [events4friend.ru](https://events4friends.ru/) ' + 
-                'и ознакомиться с предстоящими событиями.';
+                'Этот бот создан для телеграм чата @events4friends. ' + 
+                'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
+                'и обновляет информацию в закрепленном сообщении чата.\n\n' +
+                'Введите команду /info, чтобы посмотреть содержимое закрепа.';
         }
 
         bot.sendMessage(msg.chat.id, messageText, {                
