@@ -29,7 +29,40 @@ class MyFirstBotApp {
         console.log(' 2️⃣  [MyFirstBotApp]: Connected as ' + this._firebaseApp.name);        
     }
 
-    getInfo = (aCallback) => {
+    /**
+     * @private
+     */
+    _formatEvents = (events) => {
+        let message = '';
+
+        if (events.length > 0) {
+            message += 'Предстоящие мероприятия:\n\n';
+
+            for(let i = 0; i < events.length; i++) {
+                const event = events[i];
+
+                message += `📅 ${event.start} 🕗 ${event.start} － «${event.summary}»`;
+                if (event.isOnline) {
+                    message += '🕸 Всемирная паутина ';
+                } else {
+                    message += `📍 ${event.location} `;
+                }
+                const url = `https://events4friends.ru/#/event/${event.id}`
+                message += `( [Подробнее...](${url}) )`
+                message += '\n\n'
+            }
+        } else {
+            message += 'Предстоящих мероприятий нет\n\n';
+        }
+
+        return message;
+    }
+
+    /**
+     * @private
+     */
+    _getInfo = (aCallback) => {
+        const that = this;
         const db = this._firebaseApp.firestore();
         db.collection("services").get()
         .then(function(querySnapshot) {
@@ -41,11 +74,7 @@ class MyFirstBotApp {
                 
                 let message = '';
                 
-                if (events.length > 0) {
-                    message += `Предстоящие мероприятия: ${events.length}\n\n`;
-                } else {
-                    message += 'Предстоящих мероприятий нет\n\n';
-                }
+                message += that._formatEvents(events);
 
                 if (services.length > 0) {
                     message += `Услуги: ${services.length}`;
@@ -105,7 +134,7 @@ class MyFirstBotApp {
             });                
     
         } else if (messageText === '/info') {
-            this.getInfo((aMessage) => {
+            this._getInfo((aMessage) => {
                 bot.sendMessage(msg.chat.id, aMessage, {                
                     parse_mode: "Markdown",
                     disable_web_page_preview: true,                        
