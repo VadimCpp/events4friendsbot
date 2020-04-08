@@ -1,5 +1,7 @@
 const admin = require('firebase-admin');
+const moment = require('moment');
 const firebaseServiceAccount = require('./config/firebase-adminsdk.json');
+require('moment/locale/ru');
 
 class MyFirstBotApp {
 
@@ -32,6 +34,32 @@ class MyFirstBotApp {
     /**
      * @private
      */
+    _getStartDate = (event) => {
+        let startDate = 'Не указано';
+
+        if (event.start && event.start) {
+            startDate = moment(event.start).format('D MMMM, dddd');
+        }
+
+        return startDate;
+    }
+
+    /**
+     * @private
+     */
+    _getStartTime = (event) => {
+        let startDate = 'Не указано';
+
+        if (event.start && event.start) {
+            startDate = moment(event.start).format('HH:mm');
+        }
+
+        return startDate;
+    }
+
+    /**
+     * @private
+     */
     _formatEvents = (events) => {
         let message = '';
 
@@ -40,8 +68,10 @@ class MyFirstBotApp {
 
             for(let i = 0; i < events.length; i++) {
                 const event = events[i];
+                const startDate = this._getStartDate(event);
+                const startTime = this._getStartTime(event);
 
-                message += `📅 ${event.start} 🕗 ${event.start} － «${event.summary}»`;
+                message += `📅 ${startDate} 🕗 ${startTime} － «${event.summary}»`;
                 if (event.isOnline) {
                     message += '🕸 Всемирная паутина ';
                 } else {
