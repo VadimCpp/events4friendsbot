@@ -40,7 +40,13 @@ class MyFirstBotApp {
                 'Этот бот создан для телеграм чата @events4friends. ' + 
                 'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
                 'и обновляет информацию в закрепленном сообщении чата.\n\n' +
-                'Введите команду /info, чтобы посмотреть содержимое закрепа.';
+                'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
+        } else if (messageText === '/info') {
+            messageText = 'TODO';
+        } else {
+            messageText =
+                'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
+                'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
         }
 
         bot.sendMessage(msg.chat.id, messageText, {                
