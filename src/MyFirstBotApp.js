@@ -232,6 +232,23 @@ class MyFirstBotApp {
     }
 
     /**
+     * @public
+     */
+    updatePinnedMessage = () => {
+        if (this._pinnedMessageId) {
+            console.log('There is pinned message: ', this._pinnedMessageId)
+            this._updatePinnedMessage(bot, () => {
+                console.log('updatePinnedMessage callback')
+            })
+        } else {
+            console.log('No pinned message found, create new one...')
+            this._sendMessageToChatAndPin(bot, () => {
+                console.log('sendMessageToChatAndPin callback')
+            })    
+        }
+    }
+
+    /**
      * Main event handler
      *
      * @param {Object} msg
@@ -268,17 +285,7 @@ class MyFirstBotApp {
                     });                 
                 })
             } else if (messageText === '/update') {
-                if (this._pinnedMessageId) {
-                    console.log('There is pinned message: ', this._pinnedMessageId)
-                    this._updatePinnedMessage(bot, () => {
-                        console.log('updatePinnedMessage callback')
-                    })
-                } else {
-                    console.log('No pinned message found, create new one...')
-                    this._sendMessageToChatAndPin(bot, () => {
-                        console.log('sendMessageToChatAndPin callback')
-                    })    
-                }
+                this.updatePinnedMessage();
             } else {
                 messageText =
                     'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +

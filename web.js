@@ -51,5 +51,14 @@ module.exports = function(bot) {
             bot.processUpdate(req.body);
             res.sendStatus(200);
         });
-
+    
+    // Обрабочик метода POST от сайта events4friends.ru
+      app.post('/update', function (req, res) {
+        console.log('origin:', req.get('origin'));
+        if (req.get('origin') === 'https://events4friends.ru') {
+          bot.updatePinnedMessage();
+        } else {
+          console.warn('Ignore /update request from unknown resource')
+        }
+      });
 };
