@@ -16,7 +16,7 @@ if (isProduction) {
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-bot.updatePinnedMessage = () => myFirstBotApp.updatePinnedMessage()
+bot.updatePinnedMessage = () => myFirstBotApp.updatePinnedMessage(bot)
 
 bot.on('message', (msg) => {
     myFirstBotApp.handleMessage(msg, bot);

@@ -232,9 +232,10 @@ class MyFirstBotApp {
     }
 
     /**
+     * @param {Object} bot
      * @public
      */
-    updatePinnedMessage = () => {
+    updatePinnedMessage = (bot) => {
         if (this._pinnedMessageId) {
             console.log('There is pinned message: ', this._pinnedMessageId)
             this._updatePinnedMessage(bot, () => {
@@ -285,7 +286,7 @@ class MyFirstBotApp {
                     });                 
                 })
             } else if (messageText === '/update') {
-                this.updatePinnedMessage();
+                this.updatePinnedMessage(bot);
             } else {
                 messageText =
                     'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
