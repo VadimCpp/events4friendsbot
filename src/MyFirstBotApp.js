@@ -212,10 +212,21 @@ class MyFirstBotApp {
                 aCallback();
             })
             .catch((error) => {
-                console.log('Error editing message:', error);
-                //
-                // TODO:
-                //
+                console.log('Failed editing message:', error);
+                console.log('Send and pin new instead');
+                if (error 
+                    && error.response 
+                    && error.response.body
+                    && error.response.body.description
+                    && error.response.body.description ===
+                        'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message'
+                ) {
+                    console.log('Message is not modified: skip updating');
+                } else {
+                    this._sendMessageToChatAndPin(bot, () => {
+                        console.log('Succesfully send and pin new message');
+                    })
+                }
             });
         })
     }
