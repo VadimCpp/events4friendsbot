@@ -78,7 +78,19 @@ class MyFirstBotApp {
      * @private
      */
     _formatEvents = (events) => {
+        const now = new Date(); 
         let message = '';
+
+        events = events.filter(event => moment(event.start).toDate() > now);
+
+        events.sort((a, b) => {
+            if (a.start > b.start) {
+                return 1;
+            } else if (a.start < b.start) {
+                return -1;
+            }
+            return 0;
+        });
 
         if (events.length > 0) {
             message += 'Предстоящие мероприятия:\n\n';
@@ -101,6 +113,8 @@ class MyFirstBotApp {
         } else {
             message += 'Предстоящих мероприятий нет\n\n';
         }
+
+        message += 'Вы планируете провести трансляцию или организовать мероприятие? Предлагаем Вам [сделать анонс...](https://events4friends.ru/#/newevent)\n\n'
 
         return message;
     }
