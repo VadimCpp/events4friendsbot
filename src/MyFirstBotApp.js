@@ -54,7 +54,7 @@ class MyFirstBotApp {
     _getStartDate = (event) => {
         let startDate = 'Не указано';
 
-        if (event.start && event.start) {
+        if (event && event.start) {
             startDate = moment(event.start).format('D MMMM, dddd');
         }
 
@@ -67,12 +67,28 @@ class MyFirstBotApp {
     _getStartTime = (event) => {
         let startDate = 'Не указано';
 
-        if (event.start && event.start) {
+        if (event && event.start) {
             startDate = moment(event.start).format('HH:mm');
         }
 
         return startDate;
     }
+
+    /**
+     * @private
+     */
+    _getTimezone = (event) => {
+        let timezone = '';
+
+        if (event && event.timezone === '+0200') {
+            timezone += ' (Клд)';
+        }
+        if (event && event.timezone === '+0300') {
+            timezone += ' (Мск)';
+        }
+
+        return timezone;
+    }       
 
     /**
      * @private
@@ -99,8 +115,9 @@ class MyFirstBotApp {
                 const event = events[i];
                 const startDate = this._getStartDate(event);
                 const startTime = this._getStartTime(event);
+                const timezone = this._getTimezone(event);
 
-                message += `📅 ${startDate} 🕗 ${startTime} － «${event.summary}»`;
+                message += `📅 ${startDate} 🕗 ${startTime}${timezone} － «${event.summary}»`;
                 if (event.isOnline) {
                     message += '🕸 Всемирная паутина ';
                 } else {
