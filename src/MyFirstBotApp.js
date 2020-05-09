@@ -97,7 +97,11 @@ class MyFirstBotApp {
         const now = new Date(); 
         let message = '';
 
-        events = events.filter(event => moment(event.start).toDate() > now);
+        events = events.filter(event => {
+            return event.start && event.timezone
+                ? moment(`${event.start}${event.timezone}`).toDate() > now
+                : false;
+        });
 
         events.sort((a, b) => {
             if (a.start > b.start) {
