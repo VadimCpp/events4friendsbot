@@ -119,7 +119,7 @@ class MyFirstBotApp {
 
                 message += `📅 ${startDate} 🕗 ${startTime}${timezone} － «${event.summary}»`;
                 if (event.isOnline) {
-                    message += '🕸 Всемирная паутина ';
+                    message += '🕸 Онлайн ';
                 } else {
                     message += `📍 ${event.location} `;
                 }
