@@ -135,8 +135,6 @@ class MyFirstBotApp {
             message += 'Предстоящих мероприятий нет\n\n';
         }
 
-        message += 'Вы планируете провести трансляцию или организовать мероприятие? Предлагаем Вам [сделать анонс...](https://events4friends.ru/#/newevent)\n\n'
-
         return message;
     }
 
