@@ -278,6 +278,34 @@ class MyFirstBotApp {
         }
     }
 
+    handleRemindersCommand = (bot) => {
+        const that = this;
+        const db = this._firebaseApp.firestore();
+        db.collection("reminders").get()
+        .then(function(querySnapshot) {
+            const reminders = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+            console.log('reminders', reminders);
+            //
+            // NOTE!
+            // Для каждого элемента массива проверка:
+            //  - value == true (напоминание установлено)
+            //  - мероприятие eventId состоится сегодня
+            //
+            // Сформировать текст уведомления
+            // Сформировать объект для уведомления, который будет содержать eventId
+            //
+            // Отправить уведомление
+            //
+        })
+        .catch(function(error) {
+            console.warn("Error getting reminders, skip: ", error);
+            aCallback(
+                'Увы, произошла неизвестная ошибка. ' + 
+                'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+            );
+        });
+    }
+
     /**
      * Main event handler
      *
@@ -316,6 +344,8 @@ class MyFirstBotApp {
                 })
             } else if (messageText === '/update') {
                 this.updatePinnedMessage(bot);
+            } else if (messageText === '/reminders') {
+                this.handleRemindersCommand(bot);
             } else {
                 messageText =
                     'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
