@@ -36,6 +36,8 @@ class MyFirstBotApp {
             "client_x509_cert_url": process.env.CLIENT_X509_CERT_URL,
         }
         
+        this._adminId = '148045459'; // @vadimcpp
+
         /**
          * @type {Object}
          * @private
@@ -278,32 +280,51 @@ class MyFirstBotApp {
         }
     }
 
-    handleRemindersCommand = (bot) => {
+    /**
+     * Main event handler
+     *
+     * @param {Object} bot
+     * @param {Object} msg
+     * @public
+     */
+    handleRemindersCommand = (bot, msg) => {
         const that = this;
-        const db = this._firebaseApp.firestore();
-        db.collection("reminders").get()
-        .then(function(querySnapshot) {
-            const reminders = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
-            console.log('reminders', reminders);
-            //
-            // NOTE!
-            // Для каждого элемента массива проверка:
-            //  - value == true (напоминание установлено)
-            //  - мероприятие eventId состоится сегодня
-            //
-            // Сформировать текст уведомления
-            // Сформировать объект для уведомления, который будет содержать eventId
-            //
-            // Отправить уведомление
-            //
-        })
-        .catch(function(error) {
-            console.warn("Error getting reminders, skip: ", error);
-            aCallback(
-                'Увы, произошла неизвестная ошибка. ' + 
-                'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+
+        if (msg.chat.id == this._adminId) {
+            const db = this._firebaseApp.firestore();
+            db.collection("reminders").get()
+            .then(function(querySnapshot) {
+                const reminders = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+                console.log('reminders', reminders);
+                //
+                // NOTE!
+                // Для каждого элемента массива проверка:
+                //  - value == true (напоминание установлено)
+                //  - мероприятие eventId состоится сегодня
+                //
+                // Сформировать текст уведомления
+                // Сформировать объект для уведомления, который будет содержать eventId
+                //
+                // Отправить уведомление
+                //
+                bot.sendMessage(
+                    msg.chat.id,
+                    "Сделаем!"
+                );            
+            })
+            .catch(function(error) {
+                console.warn("Error getting reminders, skip: ", error);
+                aCallback(
+                    'Увы, произошла неизвестная ошибка. ' + 
+                    'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+                );
+            });
+        } else {
+            bot.sendMessage(
+                msg.chat.id,
+                "К сожалению, у Вас нет прав выполнить эту команду. Попробуйте /info"
             );
-        });
+        }
     }
 
     /**
@@ -344,8 +365,8 @@ class MyFirstBotApp {
                 })
             } else if (messageText === '/update') {
                 this.updatePinnedMessage(bot);
-            } else if (messageText === '/reminders') {
-                this.handleRemindersCommand(bot);
+            } else if (messageText === '/remind') {
+                this.handleRemindersCommand(bot, msg);
             } else {
                 messageText =
                     'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
