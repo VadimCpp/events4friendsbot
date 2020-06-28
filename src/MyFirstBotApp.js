@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
@@ -327,6 +328,114 @@ class MyFirstBotApp {
         }
     }
 
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    _sendPushNotification = async (expoPushToken) => {
+        const message = {
+            to: expoPushToken,
+            sound: 'default',
+            title: 'Дорогие котики 🐈',
+            body: 'Вы прекрасны 😻!!!',
+            data: { data: 'goes here' },
+            _displayInForeground: true,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
+    };
+
+    /**
+     * Testpush event handler
+     *
+     * @param {Object} bot
+     * @param {Object} msg
+     * @public
+     */
+    handleTestpushCommand = (bot, msg) => {
+        const that = this;
+
+        if (msg.chat.id == this._adminId) {
+            const db = this._firebaseApp.firestore();
+
+            //
+            // NOTE!
+            // Получаем напоминания reminders из базы данных 
+            //
+            db.collection("reminders").get()
+            .then(function(querySnapshot) {
+                let reminders = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+
+                //
+                // NOTE!
+                // Получаем напоминания events из базы данных 
+                //
+                db.collection("events").get()
+                .then(function(eventsSnapshot) {
+                    let events = eventsSnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+
+                    //
+                    // NOTE!
+                    // Фильтруем события: оставляем только те, которые будут сегодня.
+                    //
+                    events = events.filter(event => moment(event.start).isSame(new Date(), 'day'));
+
+                    //
+                    // NOTE!
+                    // Фильтруем напоминания: оставляем только напоминания для отфильтрованых событий.
+                    //
+                    reminders = reminders.filter(reminder => {
+                        const reminderEventId = reminder.eventId;
+                        for(let i = 0; i < events.length; i++) {
+                            const event = events[i];
+                            if (reminderEventId == event.id) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+                    console.log('filtered reminders:', reminders);
+
+                    //
+                    // NOTE!
+                    // Отправляем PUSH уведомления
+                    //
+                    for(let i = 0; i < reminders.length; i++) {
+                        that._sendPushNotification(reminders[i].expoPushToken);
+                    }
+
+                    bot.sendMessage(
+                        msg.chat.id,
+                        'Отправлены тестовые push-уведомления на все устройства для событий сегодня. Проверяйте!'
+                    );
+                })
+                .catch(function(error) {
+                    console.warn("Error getting events, skip: ", error);
+                    aCallback(
+                        'Увы, произошла неизвестная ошибка. ' + 
+                        'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+                    );
+                });
+            })
+            .catch(function(error) {
+                console.warn("Error getting reminders, skip: ", error);
+                aCallback(
+                    'Увы, произошла неизвестная ошибка. ' + 
+                    'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+                );
+            });
+        } else {
+            bot.sendMessage(
+                msg.chat.id,
+                "К сожалению, у Вас нет прав выполнить эту команду. Попробуйте /info"
+            );
+        }        
+    }
+
     /**
      * Main event handler
      *
@@ -367,6 +476,8 @@ class MyFirstBotApp {
                 this.updatePinnedMessage(bot);
             } else if (messageText === '/remind') {
                 this.handleRemindersCommand(bot, msg);
+            } else if (messageText === '/testpush') {
+                this.handleTestpushCommand(bot, msg);
             } else {
                 messageText =
                     'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
