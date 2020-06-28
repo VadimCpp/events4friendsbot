@@ -281,37 +281,116 @@ class MyFirstBotApp {
         }
     }
 
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    _sendPushNotification = async (expoPushToken, summary) => {
+        const message = {
+            to: expoPushToken,
+            sound: 'default',
+            title: 'Вы установили напоминание',
+            body: `Сегодня состоится «${summary}»`,
+            data: { data: 'goes here' },
+            _displayInForeground: true,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
+    };
+
     /**
-     * Main event handler
+     * /remind command handler
      *
      * @param {Object} bot
      * @param {Object} msg
      * @public
      */
-    handleRemindersCommand = (bot, msg) => {
+    handleRemindCommand = (bot, msg) => {
         const that = this;
 
         if (msg.chat.id == this._adminId) {
             const db = this._firebaseApp.firestore();
+
+            //
+            // NOTE!
+            // Получаем напоминания reminders из базы данных 
+            //
             db.collection("reminders").get()
             .then(function(querySnapshot) {
-                const reminders = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
-                console.log('reminders', reminders);
+                let reminders = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+
                 //
                 // NOTE!
-                // Для каждого элемента массива проверка:
-                //  - value == true (напоминание установлено)
-                //  - мероприятие eventId состоится сегодня
+                // Получаем напоминания events из базы данных 
                 //
-                // Сформировать текст уведомления
-                // Сформировать объект для уведомления, который будет содержать eventId
-                //
-                // Отправить уведомление
-                //
-                bot.sendMessage(
-                    msg.chat.id,
-                    "Сделаем!"
-                );            
+                db.collection("events").get()
+                .then(function(eventsSnapshot) {
+                    let events = eventsSnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+
+                    //
+                    // NOTE!
+                    // Фильтруем события: оставляем только те, которые будут сегодня.
+                    //
+                    events = events.filter(event => moment(event.start).isSame(new Date(), 'day'));
+
+                    //
+                    // NOTE!
+                    // Фильтруем напоминания: оставляем только напоминания для отфильтрованых событий.
+                    //
+                    reminders = reminders.filter(reminder => {
+                        const reminderEventId = reminder.eventId;
+                        for(let i = 0; i < events.length; i++) {
+                            const event = events[i];
+                            if (reminderEventId == event.id) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+
+                    //
+                    // NOTE!
+                    // Изменяем напоминания: добавляем данные о событии
+                    //
+                    reminders = reminders.map(reminder => {
+                        const reminderEventId = reminder.eventId;
+                        for(let i = 0; i < events.length; i++) {
+                            const event = events[i];
+                            if (reminderEventId == event.id) {
+                                return {
+                                    summary: event.summary,
+                                    ...reminder,
+                                }    
+                            }
+                        }
+                        return reminder;
+                    })
+                    console.log('filtered and updated reminders:', reminders);
+
+                    //
+                    // NOTE!
+                    // Отправляем PUSH уведомления
+                    //
+                    for(let i = 0; i < reminders.length; i++) {
+                        that._sendPushNotification(reminders[i].expoPushToken, reminders[i].summary);
+                    }
+
+                    bot.sendMessage(
+                        msg.chat.id,
+                        'Отправлены push-уведомления на все устройства для событий сегодня. Проверяйте!'
+                    );
+                })
+                .catch(function(error) {
+                    console.warn("Error getting events, skip: ", error);
+                    aCallback(
+                        'Увы, произошла неизвестная ошибка. ' + 
+                        'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+                    );
+                });
             })
             .catch(function(error) {
                 console.warn("Error getting reminders, skip: ", error);
@@ -329,7 +408,7 @@ class MyFirstBotApp {
     }
 
     // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-    _sendPushNotification = async (expoPushToken) => {
+    _sendTestPushNotification = async (expoPushToken) => {
         const message = {
             to: expoPushToken,
             sound: 'default',
@@ -350,7 +429,7 @@ class MyFirstBotApp {
     };
 
     /**
-     * Testpush event handler
+     * /testpush command handler
      *
      * @param {Object} bot
      * @param {Object} msg
@@ -405,7 +484,7 @@ class MyFirstBotApp {
                     // Отправляем PUSH уведомления
                     //
                     for(let i = 0; i < reminders.length; i++) {
-                        that._sendPushNotification(reminders[i].expoPushToken);
+                        that._sendTestPushNotification(reminders[i].expoPushToken);
                     }
 
                     bot.sendMessage(
@@ -475,7 +554,7 @@ class MyFirstBotApp {
             } else if (messageText === '/update') {
                 this.updatePinnedMessage(bot);
             } else if (messageText === '/remind') {
-                this.handleRemindersCommand(bot, msg);
+                this.handleRemindCommand(bot, msg);
             } else if (messageText === '/testpush') {
                 this.handleTestpushCommand(bot, msg);
             } else {
