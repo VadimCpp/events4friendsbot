@@ -114,11 +114,15 @@ class MyFirstBotApp {
             }
             return 0;
         });
+        
+        const MAX_DISPLAYED_COUNT = 5;
+        let moreUpcomingEvents = 0;
 
         if (events.length > 0) {
             message += 'Предстоящие мероприятия:\n\n';
 
             for(let i = 0; i < events.length; i++) {
+              if (i < MAX_DISPLAYED_COUNT) {
                 const event = events[i];
                 const startDate = this._getStartDate(event);
                 const startTime = this._getStartTime(event);
@@ -133,6 +137,18 @@ class MyFirstBotApp {
                 const url = `https://events4friends.ru/#/event/${event.id}`
                 message += `( [Подробнее...](${url}) )`
                 message += '\n\n'
+              } else {
+                moreUpcomingEvents++;
+              }
+            }
+
+            const upcomingEventsUrl = 'https://events4friends.ru/#/events';
+            if (moreUpcomingEvents === 1) {
+              message += `и еще [${moreUpcomingEvents} предстоящее мероприятие](${upcomingEventsUrl})...`
+              message += '\n\n'
+            } else if (moreUpcomingEvents > 1) {
+              message += `и еще [${moreUpcomingEvents} предстоящих мероприятий](${upcomingEventsUrl})...`
+              message += '\n\n'
             }
         } else {
             message += 'Предстоящих мероприятий нет\n\n';
@@ -159,8 +175,9 @@ class MyFirstBotApp {
                 
                 message += that._formatEvents(events);
 
-                message += `Сообщества: [events4friends.ru/communities](https://events4friends.ru/#/communities)\n\n`;
-                message += `Услуги: [events4friends.ru/services](https://events4friends.ru/#/services)`;
+                message += 'Также на сайте доступна информация о ';
+                message += '[сообществах](https://events4friends.ru/#/communities) и ';
+                message += '[услугах](https://events4friends.ru/#/services)';
                 
                 aCallback(message)
             })
