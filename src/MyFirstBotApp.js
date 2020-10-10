@@ -114,11 +114,15 @@ class MyFirstBotApp {
             }
             return 0;
         });
+        
+        const MAX_DISPLAYED_COUNT = 5;
+        let moreUpcomingEvents = 0;
 
         if (events.length > 0) {
             message += 'Предстоящие мероприятия:\n\n';
 
             for(let i = 0; i < events.length; i++) {
+              if (i < MAX_DISPLAYED_COUNT) {
                 const event = events[i];
                 const startDate = this._getStartDate(event);
                 const startTime = this._getStartTime(event);
@@ -133,6 +137,18 @@ class MyFirstBotApp {
                 const url = `https://events4friends.ru/#/event/${event.id}`
                 message += `( [Подробнее...](${url}) )`
                 message += '\n\n'
+              } else {
+                moreUpcomingEvents++;
+              }
+            }
+
+            const upcomingEventsUrl = 'https://events4friends.ru/#/events';
+            if (moreUpcomingEvents === 1) {
+              message += `и еще [${moreUpcomingEvents} предстоящее мероприятие](${upcomingEventsUrl})...`
+              message += '\n\n'
+            } else if (moreUpcomingEvents > 1) {
+              message += `и еще [${moreUpcomingEvents} предстоящих мероприятий](${upcomingEventsUrl})...`
+              message += '\n\n'
             }
         } else {
             message += 'Предстоящих мероприятий нет\n\n';
