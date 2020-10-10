@@ -175,8 +175,9 @@ class MyFirstBotApp {
                 
                 message += that._formatEvents(events);
 
-                message += `Сообщества: [events4friends.ru/communities](https://events4friends.ru/#/communities)\n\n`;
-                message += `Услуги: [events4friends.ru/services](https://events4friends.ru/#/services)`;
+                message += 'Также на сайте доступна информация о ';
+                message += '[сообществах](https://events4friends.ru/#/communities) и ';
+                message += '[услугах](https://events4friends.ru/#/services)';
                 
                 aCallback(message)
             })
