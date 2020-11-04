@@ -3,10 +3,9 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-const verboseDateTime = require('./verboseDateTime.js');
+const verboseEventsList = reqire('./verboseEventsList.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
-const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
 const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
 
@@ -52,67 +51,6 @@ class Events4FriendsBotApp {
     /**
      * @private
      */
-    _formatEvents = (events) => {
-        const now = new Date(); 
-        let message = '';
-
-        events = events.filter(event => {
-            return event.start && event.timezone
-                ? moment(`${event.start}${event.timezone}`, FIREBASE_DATE_FORMAT_WITH_UTC).toDate() > now
-                : false;
-        });
-
-        events.sort((a, b) => {
-            if (a.start > b.start) {
-                return 1;
-            } else if (a.start < b.start) {
-                return -1;
-            }
-            return 0;
-        });
-        
-        const MAX_DISPLAYED_COUNT = 5;
-        let moreUpcomingEvents = 0;
-
-        if (events.length > 0) {
-            message += 'Предстоящие мероприятия:\n\n';
-
-            for(let i = 0; i < events.length; i++) {
-              if (i < MAX_DISPLAYED_COUNT) {
-                const event = events[i];
-
-                message += `${verboseDateTime(event)} － «${event.summary}»`;
-                if (event.isOnline) {
-                    message += '🕸 Онлайн ';
-                } else {
-                    message += `📍 ${event.location} `;
-                }
-                const url = `https://events4friends.ru/#/event/${event.id}`
-                message += `( [Подробнее...](${url}) )`
-                message += '\n\n'
-              } else {
-                moreUpcomingEvents++;
-              }
-            }
-
-            const upcomingEventsUrl = 'https://events4friends.ru/#/events';
-            if (moreUpcomingEvents === 1) {
-              message += `и еще [${moreUpcomingEvents} предстоящее мероприятие](${upcomingEventsUrl})...`
-              message += '\n\n'
-            } else if (moreUpcomingEvents > 1) {
-              message += `и еще [${moreUpcomingEvents} предстоящих мероприятий](${upcomingEventsUrl})...`
-              message += '\n\n'
-            }
-        } else {
-            message += 'Предстоящих мероприятий нет\n\n';
-        }
-
-        return message;
-    }
-
-    /**
-     * @private
-     */
     _getInfo = (aCallback) => {
         const that = this;
         const db = this._firebaseApp.firestore();
@@ -126,7 +64,7 @@ class Events4FriendsBotApp {
                 
                 let message = '';
                 
-                message += that._formatEvents(events);
+                message += verboseEventsList(events);
 
                 message += 'Также на сайте доступна информация о ';
                 message += '[сообществах](https://events4friends.ru/#/communities) и ';
