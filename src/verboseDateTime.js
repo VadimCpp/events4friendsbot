@@ -5,6 +5,10 @@ const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 
 //
 // Функция преобразовует начало мероприятия event.start в читаемый формат даты
+// Примеры работы функции:
+//   5 ноября, четверг
+//   7 ноября, суббота
+//   8 ноября, воскресенье
 //
 const getStartDate = (event) => {
   let startDate = 'Не указано';
@@ -18,6 +22,10 @@ const getStartDate = (event) => {
 
 //
 // Функция преобразовует начало мероприятия event.start в читаемый формат времени
+// Примеры работы функции:
+//   17:30
+//   10:00
+//   15:00
 //
 const getStartTime = (event) => {
   let startDate = 'Не указано';
@@ -31,6 +39,9 @@ const getStartTime = (event) => {
 
 //
 // Функция преобразовует часовой пояс event.timezone в удобный формат для человека
+// Примеры работы функции:
+//   (Мск)
+//   (Клд) 
 //
 const getTimezone = (event) => {
   let timezone = '';
