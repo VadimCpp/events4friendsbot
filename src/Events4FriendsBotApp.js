@@ -4,7 +4,7 @@ const moment = require('moment');
 require('moment/locale/ru');
 
 const verboseEventsList = require('./verboseEventsList.js');
-const dbReadServices = require('./dbReadServices.js');
+const dbReadPinnedMessages = require('./dbReadPinnedMessages.js');
 const dbReadEvents = require('./dbReadEvents.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
@@ -55,8 +55,11 @@ class Events4FriendsBotApp {
      */
     _getInfo = (aCallback) => {
       const db = this._firebaseApp.firestore();
-      dbReadServices(db,
-        function (services) {
+      dbReadPinnedMessages(db,
+        function (pinnedMessages) {
+          //
+          // TODO: use pinnedMessages
+          //
           dbReadEvents(db,
             function (events) { 
               const message = verboseEventsList(events);
