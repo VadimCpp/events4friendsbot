@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-const utils = require('./utils.js');
+const verboseDateTime = require('./utils.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
@@ -80,11 +80,8 @@ class Events4FriendsBotApp {
             for(let i = 0; i < events.length; i++) {
               if (i < MAX_DISPLAYED_COUNT) {
                 const event = events[i];
-                const startDate = utils.getStartDate(event);
-                const startTime = utils.getStartTime(event);
-                const timezone = utils.getTimezone(event);
 
-                message += `📅 ${startDate} 🕗 ${startTime}${timezone} － «${event.summary}»`;
+                message += `${verboseDateTime(event)} － «${event.summary}»`;
                 if (event.isOnline) {
                     message += '🕸 Онлайн ';
                 } else {

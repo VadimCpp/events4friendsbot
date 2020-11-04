@@ -45,6 +45,19 @@ const getTimezone = (event) => {
   return timezone;
 }      
 
-module.exports.getStartDate = getStartDate;
-module.exports.getStartTime = getStartTime;
-module.exports.getTimezone = getTimezone;
+//
+// Функция verboseDateTime возвращает время начала мероприятия в удобочитаемом формате.
+// Примеры работы функции:
+//   📅 5 ноября, четверг 🕗 17:30 (Мск)
+//   📅 7 ноября, суббота 🕗 10:00 (Клд) 
+//   📅 8 ноября, воскресенье 🕗 15:00 (Клд)
+//
+const verboseDateTime = (event) => {
+  const startDate = getStartDate(event);
+  const startTime = getStartTime(event);
+  const timezone = getTimezone(event);
+
+  return `📅 ${startDate} 🕗 ${startTime}${timezone}`;
+}
+
+module.exports = verboseDateTime;
