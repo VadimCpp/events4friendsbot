@@ -5,7 +5,6 @@ require('moment/locale/ru');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
-const WEB_SITE = 'vadimcpp.ru';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
 const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
 
@@ -18,14 +17,7 @@ class Events4FriendsBotApp {
         console.log('');
         console.log('[Events4FriendsBotApp]: Create Application...');
 
-        /**
-         * @type {string}
-         * @private
-         */
-        this._myWebsite = WEB_SITE;
-
         this._pinnedMessageId = null;
-
         this._chatId = process.env.NODE_ENV === 'development' ? FRONTEND_BASICS_CHAT_ID : EVENTS4FRIENDS_CHAT_ID;
 
         const firebaseServiceAccount = {
