@@ -3,14 +3,14 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-class MyFirstBotApp {
+class Events4FriendsBotApp {
 
     /**
      * @public
      */
     constructor() {
         console.log('');
-        console.log('[MyFirstBotApp]: Create Application...');
+        console.log('[Events4FriendsBotApp]: Create Application...');
 
         /**
          * @type {string}
@@ -48,7 +48,7 @@ class MyFirstBotApp {
             databaseURL: process.env.DATABASE_URL
         }, 'events4friends-bot');
 
-        console.log(' 2️⃣  [MyFirstBotApp]: Connected as ' + this._firebaseApp.name);        
+        console.log(' 2️⃣  [Events4FriendsBotApp]: Connected as ' + this._firebaseApp.name);        
     }
 
     /**
@@ -624,4 +624,4 @@ class MyFirstBotApp {
     }
 }
 
-module.exports = MyFirstBotApp;
+module.exports = Events4FriendsBotApp;
