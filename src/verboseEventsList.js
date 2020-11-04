@@ -78,6 +78,10 @@ const verboseEventsList = (events) => {
       message += `и еще [${moreUpcomingEvents} предстоящих мероприятий](${UPCOMING_EVENTS_URL})...`
       message += '\n\n'
     }
+
+    message += 'Также на сайте доступна информация о ';
+    message += '[сообществах](https://events4friends.ru/#/communities) и ';
+    message += '[услугах](https://events4friends.ru/#/services)';
   } else {
     message += 'Предстоящих мероприятий нет\n\n';
   }

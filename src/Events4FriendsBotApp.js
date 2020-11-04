@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-const verboseEventsList = reqire('./verboseEventsList.js');
+const verboseEventsList = require('./verboseEventsList.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
@@ -65,11 +65,7 @@ class Events4FriendsBotApp {
                 let message = '';
                 
                 message += verboseEventsList(events);
-
-                message += 'Также на сайте доступна информация о ';
-                message += '[сообществах](https://events4friends.ru/#/communities) и ';
-                message += '[услугах](https://events4friends.ru/#/services)';
-                
+           
                 aCallback(message)
             })
             .catch(function(error) {
