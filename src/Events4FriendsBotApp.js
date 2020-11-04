@@ -3,6 +3,8 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
+const utils = require('./utils.js');
+
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
@@ -45,49 +47,7 @@ class Events4FriendsBotApp {
         }, 'events4friends-bot');
 
         console.log(' 2️⃣  [Events4FriendsBotApp]: Connected as ' + this._firebaseApp.name);        
-    }
-
-    /**
-     * @private
-     */
-    _getStartDate = (event) => {
-        let startDate = 'Не указано';
-
-        if (event && event.start) {
-            startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('D MMMM, dddd');
-        }
-
-        return startDate;
-    }
-
-    /**
-     * @private
-     */
-    _getStartTime = (event) => {
-        let startDate = 'Не указано';
-
-        if (event && event.start) {
-            startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('HH:mm');
-        }
-
-        return startDate;
-    }
-
-    /**
-     * @private
-     */
-    _getTimezone = (event) => {
-        let timezone = '';
-
-        if (event && event.timezone === '+0200') {
-            timezone += ' (Клд)';
-        }
-        if (event && event.timezone === '+0300') {
-            timezone += ' (Мск)';
-        }
-
-        return timezone;
-    }       
+    } 
 
     /**
      * @private
@@ -120,9 +80,9 @@ class Events4FriendsBotApp {
             for(let i = 0; i < events.length; i++) {
               if (i < MAX_DISPLAYED_COUNT) {
                 const event = events[i];
-                const startDate = this._getStartDate(event);
-                const startTime = this._getStartTime(event);
-                const timezone = this._getTimezone(event);
+                const startDate = utils.getStartDate(event);
+                const startTime = utils.getStartTime(event);
+                const timezone = utils.getTimezone(event);
 
                 message += `📅 ${startDate} 🕗 ${startTime}${timezone} － «${event.summary}»`;
                 if (event.isOnline) {
