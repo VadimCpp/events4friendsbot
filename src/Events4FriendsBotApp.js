@@ -3,6 +3,12 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
+const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
+const WEB_SITE = 'vadimcpp.ru';
+const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
+const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
+
 class Events4FriendsBotApp {
 
     /**
@@ -16,13 +22,11 @@ class Events4FriendsBotApp {
          * @type {string}
          * @private
          */
-        this._myWebsite = 'vadimcpp.ru';
+        this._myWebsite = WEB_SITE;
 
         this._pinnedMessageId = null;
 
-        this._chatIdTest = '-1001496443397'; // @frontendBasics
-        this._chatIdProd = '-1001396932806'; // @events4friends
-        this._chatId = process.env.NODE_ENV === 'development' ? this._chatIdTest : this._chatIdProd;
+        this._chatId = process.env.NODE_ENV === 'development' ? FRONTEND_BASICS_CHAT_ID : EVENTS4FRIENDS_CHAT_ID;
 
         const firebaseServiceAccount = {
             "type": "service_account",
@@ -58,7 +62,7 @@ class Events4FriendsBotApp {
         let startDate = 'Не указано';
 
         if (event && event.start) {
-            startDate = moment(event.start, 'YYYY-MM-DDThh:mm:ss').format('D MMMM, dddd');
+            startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('D MMMM, dddd');
         }
 
         return startDate;
@@ -71,7 +75,7 @@ class Events4FriendsBotApp {
         let startDate = 'Не указано';
 
         if (event && event.start) {
-            startDate = moment(event.start, 'YYYY-MM-DDThh:mm:ss').format('HH:mm');
+            startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('HH:mm');
         }
 
         return startDate;
@@ -102,7 +106,7 @@ class Events4FriendsBotApp {
 
         events = events.filter(event => {
             return event.start && event.timezone
-                ? moment(`${event.start}${event.timezone}`, 'YYYY-MM-DDThh:mm:ssZZZZ').toDate() > now
+                ? moment(`${event.start}${event.timezone}`, FIREBASE_DATE_FORMAT_WITH_UTC).toDate() > now
                 : false;
         });
 
@@ -352,7 +356,7 @@ class Events4FriendsBotApp {
                     // NOTE!
                     // Фильтруем события: оставляем только те, которые будут сегодня.
                     //
-                    events = events.filter(event => moment(event.start, 'YYYY-MM-DDThh:mm:ss').isSame(new Date(), 'day'));
+                    events = events.filter(event => moment(event.start, FIREBASE_DATE_FORMAT).isSame(new Date(), 'day'));
 
                     //
                     // NOTE!
@@ -478,7 +482,7 @@ class Events4FriendsBotApp {
                     // NOTE!
                     // Фильтруем события: оставляем только те, которые будут сегодня.
                     //
-                    events = events.filter(event => moment(event.start, 'YYYY-MM-DDThh:mm:ss').isSame(new Date(), 'day'));
+                    events = events.filter(event => moment(event.start, FIREBASE_DATE_FORMAT).isSame(new Date(), 'day'));
 
                     //
                     // NOTE!
