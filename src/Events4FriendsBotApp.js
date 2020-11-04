@@ -58,7 +58,7 @@ class Events4FriendsBotApp {
         let startDate = 'Не указано';
 
         if (event && event.start) {
-            startDate = moment(event.start).format('D MMMM, dddd');
+            startDate = moment(event.start, 'YYYY-MM-DDThh:mm:ss').format('D MMMM, dddd');
         }
 
         return startDate;
@@ -71,7 +71,7 @@ class Events4FriendsBotApp {
         let startDate = 'Не указано';
 
         if (event && event.start) {
-            startDate = moment(event.start).format('HH:mm');
+            startDate = moment(event.start, 'YYYY-MM-DDThh:mm:ss').format('HH:mm');
         }
 
         return startDate;
@@ -102,7 +102,7 @@ class Events4FriendsBotApp {
 
         events = events.filter(event => {
             return event.start && event.timezone
-                ? moment(`${event.start}${event.timezone}`).toDate() > now
+                ? moment(`${event.start}${event.timezone}`, 'YYYY-MM-DDThh:mm:ssZZZZ').toDate() > now
                 : false;
         });
 
@@ -352,7 +352,7 @@ class Events4FriendsBotApp {
                     // NOTE!
                     // Фильтруем события: оставляем только те, которые будут сегодня.
                     //
-                    events = events.filter(event => moment(event.start).isSame(new Date(), 'day'));
+                    events = events.filter(event => moment(event.start, 'YYYY-MM-DDThh:mm:ss').isSame(new Date(), 'day'));
 
                     //
                     // NOTE!
@@ -478,7 +478,7 @@ class Events4FriendsBotApp {
                     // NOTE!
                     // Фильтруем события: оставляем только те, которые будут сегодня.
                     //
-                    events = events.filter(event => moment(event.start).isSame(new Date(), 'day'));
+                    events = events.filter(event => moment(event.start, 'YYYY-MM-DDThh:mm:ss').isSame(new Date(), 'day'));
 
                     //
                     // NOTE!
