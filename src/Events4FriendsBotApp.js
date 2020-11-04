@@ -5,6 +5,7 @@ require('moment/locale/ru');
 
 const verboseEventsList = require('./verboseEventsList.js');
 const dbReadServices = require('./dbReadServices.js');
+const dbReadEvents = require('./dbReadEvents.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
@@ -53,30 +54,18 @@ class Events4FriendsBotApp {
      * @private
      */
     _getInfo = (aCallback) => {
-      const that = this;
       const db = this._firebaseApp.firestore();
       dbReadServices(db,
         function (services) {
-          console.log('Get services');
-          console.log(services);
-
-          db.collection("events").get()
-          .then(function(querySnapshot) {
-            const events = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
-            
-            let message = '';
-            
-            message += verboseEventsList(events);
-        
-            aCallback(message)
-          })
-          .catch(function(error) {
-            console.warn("Error getting services, skip: ", error);
-            aCallback(
-              'Увы, произошла неизвестная ошибка. ' + 
-              'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
-            );
-          });
+          dbReadEvents(db,
+            function (events) { 
+              const message = verboseEventsList(events);
+              aCallback(message);
+            },
+            function (errorMessage) {
+              aCallback(errorMessage)
+            },
+          )
         }, 
         function (errorMessage) {
           aCallback(errorMessage)
