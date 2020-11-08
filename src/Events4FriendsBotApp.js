@@ -151,11 +151,11 @@ class Events4FriendsBotApp {
      * @param {Object} bot
      * @public
      */
-    updatePinnedMessage = (bot) => {
+    handleUpdateCommand = (bot) => {
         if (this._pinnedMessageId) {
             console.log('There is pinned message: ', this._pinnedMessageId)
             this._updatePinnedMessage(bot, () => {
-                console.log('updatePinnedMessage callback')
+                console.log('_updatePinnedMessage callback')
             })
         } else {
             console.log('No pinned message found, create new one...')
@@ -436,7 +436,7 @@ class Events4FriendsBotApp {
                     });                 
                 })
             } else if (messageText === '/update') {
-                this.updatePinnedMessage(bot);
+                this.handleUpdateCommand(bot);
             } else if (messageText === '/remind') {
                 this.handleRemindCommand(bot, msg);
             } else if (messageText === '/testpush') {
