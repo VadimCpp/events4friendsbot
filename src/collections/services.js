@@ -7,9 +7,9 @@
 const dbReadServices = (db, onSuccess, onError) => {
   db.collection("services").get()
   .then(function(querySnapshot) {
-      const services = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+    const services = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
 
-      onSuccess(services);
+    onSuccess(services);
   })
   .catch(function(error) {
     console.warn("Error getting services, skip: ", error);

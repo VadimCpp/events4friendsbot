@@ -4,8 +4,10 @@ const moment = require('moment');
 require('moment/locale/ru');
 
 const verboseEventsList = require('./verboseEventsList.js');
-const dbReadPinnedMessages = require('./dbReadPinnedMessages.js');
-const dbReadEvents = require('./dbReadEvents.js');
+
+// collections
+const dbReadPinnedMessages = require('./collections/pinnedMessages.js');
+const dbReadEvents = require('./collections/events.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
