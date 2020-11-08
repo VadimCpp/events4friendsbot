@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-const verboseEventsList = require('./verboseEventsList.js');
+const verboseEventsList = require('./verbose/eventsList.js');
 const dbReadEvents = require('./collections/events.js');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';

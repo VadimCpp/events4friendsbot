@@ -1,7 +1,7 @@
 const moment = require('moment');
 require('moment/locale/ru');
 
-const verboseDateTime = require('./verboseDateTime.js');
+const verboseDateTime = require('./dateTime.js');
 
 const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
 const UPCOMING_EVENTS_URL = 'https://events4friends.ru/#/events';
