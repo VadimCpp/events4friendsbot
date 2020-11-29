@@ -15,7 +15,7 @@ const dbReadEvents = (db, onSuccess, onError) => {
     console.warn("Error getting events, skip: ", error);
     onError(
       'Увы, произошла неизвестная ошибка. ' + 
-      'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
+      'Пожалуйста, обратитесь в техническую поддержку: @frontendbasics'
     );
   });
 }

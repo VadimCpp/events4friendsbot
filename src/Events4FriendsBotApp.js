@@ -5,10 +5,15 @@ require('moment/locale/ru');
 
 const verboseEventsList = require('./verbose/eventsList.js');
 const dbReadEvents = require('./collections/events.js');
+const dbPinnedMessages = require('./collections/pinnedMessages.js');
+const getPinnedMessage = require('./utils/getPinnedMessage');
+const e = require('express');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+const PINNED_MESSAGE_DATE_FORMAT = 'YYYY-MM-DD';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
 const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
+const DEFAULT_COMMUNITY_ID = 1;
 
 class Events4FriendsBotApp {
 
@@ -19,7 +24,6 @@ class Events4FriendsBotApp {
         console.log('');
         console.log('[Events4FriendsBotApp]: Create Application...');
 
-        this._pinnedMessageId = null;
         this._chatId = process.env.NODE_ENV === 'development' ? FRONTEND_BASICS_CHAT_ID : EVENTS4FRIENDS_CHAT_ID;
 
         const firebaseServiceAccount = {
@@ -95,8 +99,7 @@ class Events4FriendsBotApp {
                     })
                     .then(() => {
                         console.log('Message has pinned, save pinned message ID:', data.message_id);
-                        this._pinnedMessageId = data.message_id
-                        aCallback()
+                        aCallback(data.message_id)
                     })
                     .catch((error) => {
                         console.log('Error pinning message:', error);
@@ -111,58 +114,105 @@ class Events4FriendsBotApp {
 
     /**
      * @param {Object} bot
+     * @param {number} chatId
+     * @param {number} pinnedMessageId
      * @param {function} aCallback
      * @private
      */
-    _updatePinnedMessage(bot, aCallback) {
-        this._getInfo((aMessage) => {
-            bot.editMessageText(aMessage, {                
-                chat_id: this._chatId,
-                message_id: this._pinnedMessageId,
-                text: aMessage,
-                parse_mode: "Markdown",
-                disable_web_page_preview: true, 
-            })
-            .then(() => {
-                console.log('Message has edited');
-                aCallback();
-            })
-            .catch((error) => {
-                console.log('Failed editing message:', error);
-                console.log('Send and pin new instead');
-                if (error 
-                    && error.response 
-                    && error.response.body
-                    && error.response.body.description
-                    && error.response.body.description ===
-                        'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message'
-                ) {
-                    console.log('Message is not modified: skip updating');
-                } else {
-                    this._sendMessageToChatAndPin(bot, () => {
-                        console.log('Succesfully send and pin new message');
-                    })
-                }
-            });
+    _updatePinnedMessage(bot, chatId, pinnedMessageId, aCallback) {
+      this._getInfo((aMessage) => {
+        bot.editMessageText(aMessage, {                
+          chat_id: chatId,
+          message_id: pinnedMessageId,
+          text: aMessage,
+          parse_mode: "Markdown",
+          disable_web_page_preview: true, 
         })
+        .then(() => {
+          console.log('Message has edited');
+          aCallback();
+        })
+        .catch((error) => {
+          console.log('Failed editing message:', error);
+        });
+      })
     }
 
     /**
+     * Функция обрабатывает команду пользователя '/update'
+     * 
      * @param {Object} bot
+     * @param {Object} msg
      * @public
      */
-    handleUpdateCommand = (bot) => {
-        if (this._pinnedMessageId) {
-            console.log('There is pinned message: ', this._pinnedMessageId)
-            this._updatePinnedMessage(bot, () => {
-                console.log('_updatePinnedMessage callback')
-            })
-        } else {
-            console.log('No pinned message found, create new one...')
-            this._sendMessageToChatAndPin(bot, () => {
-                console.log('sendMessageToChatAndPin callback')
-            })    
-        }
+    handleUpdateCommand = (bot, msg) => {
+      const that = this;
+      const db = this._firebaseApp.firestore();
+      dbPinnedMessages.dbReadPinnedMessages(db,
+        function (pinnedMessages) {
+          const pinnedMessage = getPinnedMessage(pinnedMessages, DEFAULT_COMMUNITY_ID);
+
+          if (pinnedMessage) {
+            //
+            // NOTE!
+            // Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
+            // https://github.com/VadimCpp/events4friends-firestore#%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82%D0%BE%D1%80%D1%8B-%D0%B7%D0%B0%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9
+            //
+            // Сравнение даты происходит путем сравнения строк (например "2020-11-09")
+            //
+            const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+
+            if (today === pinnedMessages.date) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
+              
+              if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
+
+                that._updatePinnedMessage(bot, pinnedMessage.chatId, pinnedMessage.pinnedMessageId, () => {});
+
+              } else if (pinnedMessage.chatId && !pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении не найдена
+                that._sendMessageToChatAndPin(bot, function (messageId) {
+                  dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+                });
+
+              } else { // Ошибка данных в firebase
+                bot.sendMessage(
+                  msg.chat.id,
+                  'Не могу найти чат, к которому относится закрепленное сообщение. ' + 
+                  'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+                );
+              }
+
+            } else { // Текущая дата не совпадает с датой закрепленного сообщения в базе данных.
+
+              if (pinnedMessage.chatId) { // Информация о чате сообщества найдена
+                that._sendMessageToChatAndPin(bot, function (messageId) {
+                  dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+                });
+
+              } else { // Ошибка данных в firebase
+                bot.sendMessage(
+                  msg.chat.id,
+                  'Невозможно найти чат, к которому относится закрепленное сообщение. ' + 
+                  'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+                );
+              }
+
+            }
+
+          } else {
+            bot.sendMessage(
+              msg.chat.id,
+              'Произошла ошибка при получении информации о закрепленном сообщении. ' + 
+              'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+            );
+          }
+        },
+        function (errorMessage) {
+          bot.sendMessage(
+            msg.chat.id,
+            errorMessage
+          );
+        },
+      );
     }
 
     // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
@@ -436,7 +486,7 @@ class Events4FriendsBotApp {
                     });                 
                 })
             } else if (messageText === '/update') {
-                this.handleUpdateCommand(bot);
+                this.handleUpdateCommand(bot, msg);
             } else if (messageText === '/remind') {
                 this.handleRemindCommand(bot, msg);
             } else if (messageText === '/testpush') {
