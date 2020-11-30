@@ -3,26 +3,28 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-class MyFirstBotApp {
+const verboseEventsList = require('./verbose/eventsList.js');
+const dbReadEvents = require('./collections/events.js');
+const dbPinnedMessages = require('./collections/pinnedMessages.js');
+const getPinnedMessage = require('./utils/getPinnedMessage');
+const e = require('express');
+
+const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+const PINNED_MESSAGE_DATE_FORMAT = 'YYYY-MM-DD';
+const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
+const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
+const DEFAULT_COMMUNITY_ID = 1;
+
+class Events4FriendsBotApp {
 
     /**
      * @public
      */
     constructor() {
         console.log('');
-        console.log('[MyFirstBotApp]: Create Application...');
+        console.log('[Events4FriendsBotApp]: Create Application...');
 
-        /**
-         * @type {string}
-         * @private
-         */
-        this._myWebsite = 'vadimcpp.ru';
-
-        this._pinnedMessageId = null;
-
-        this._chatIdTest = '-1001496443397'; // @frontendBasics
-        this._chatIdProd = '-1001396932806'; // @events4friends
-        this._chatId = process.env.NODE_ENV === 'development' ? this._chatIdTest : this._chatIdProd;
+        this._chatId = process.env.NODE_ENV === 'development' ? FRONTEND_BASICS_CHAT_ID : EVENTS4FRIENDS_CHAT_ID;
 
         const firebaseServiceAccount = {
             "type": "service_account",
@@ -48,154 +50,23 @@ class MyFirstBotApp {
             databaseURL: process.env.DATABASE_URL
         }, 'events4friends-bot');
 
-        console.log(' 2️⃣  [MyFirstBotApp]: Connected as ' + this._firebaseApp.name);        
-    }
-
-    /**
-     * @private
-     */
-    _getStartDate = (event) => {
-        let startDate = 'Не указано';
-
-        if (event && event.start) {
-            startDate = moment(event.start).format('D MMMM, dddd');
-        }
-
-        return startDate;
-    }
-
-    /**
-     * @private
-     */
-    _getStartTime = (event) => {
-        let startDate = 'Не указано';
-
-        if (event && event.start) {
-            startDate = moment(event.start).format('HH:mm');
-        }
-
-        return startDate;
-    }
-
-    /**
-     * @private
-     */
-    _getTimezone = (event) => {
-        let timezone = '';
-
-        if (event && event.timezone === '+0200') {
-            timezone += ' (Клд)';
-        }
-        if (event && event.timezone === '+0300') {
-            timezone += ' (Мск)';
-        }
-
-        return timezone;
-    }       
-
-    /**
-     * @private
-     */
-    _formatEvents = (events) => {
-        const now = new Date(); 
-        let message = '';
-
-        events = events.filter(event => {
-            return event.start && event.timezone
-                ? moment(`${event.start}${event.timezone}`).toDate() > now
-                : false;
-        });
-
-        events.sort((a, b) => {
-            if (a.start > b.start) {
-                return 1;
-            } else if (a.start < b.start) {
-                return -1;
-            }
-            return 0;
-        });
-        
-        const MAX_DISPLAYED_COUNT = 5;
-        let moreUpcomingEvents = 0;
-
-        if (events.length > 0) {
-            message += 'Предстоящие мероприятия:\n\n';
-
-            for(let i = 0; i < events.length; i++) {
-              if (i < MAX_DISPLAYED_COUNT) {
-                const event = events[i];
-                const startDate = this._getStartDate(event);
-                const startTime = this._getStartTime(event);
-                const timezone = this._getTimezone(event);
-
-                message += `📅 ${startDate} 🕗 ${startTime}${timezone} － «${event.summary}»`;
-                if (event.isOnline) {
-                    message += '🕸 Онлайн ';
-                } else {
-                    message += `📍 ${event.location} `;
-                }
-                const url = `https://events4friends.ru/#/event/${event.id}`
-                message += `( [Подробнее...](${url}) )`
-                message += '\n\n'
-              } else {
-                moreUpcomingEvents++;
-              }
-            }
-
-            const upcomingEventsUrl = 'https://events4friends.ru/#/events';
-            if (moreUpcomingEvents === 1) {
-              message += `и еще [${moreUpcomingEvents} предстоящее мероприятие](${upcomingEventsUrl})...`
-              message += '\n\n'
-            } else if (moreUpcomingEvents > 1) {
-              message += `и еще [${moreUpcomingEvents} предстоящих мероприятий](${upcomingEventsUrl})...`
-              message += '\n\n'
-            }
-        } else {
-            message += 'Предстоящих мероприятий нет\n\n';
-        }
-
-        return message;
-    }
+        console.log(' 2️⃣  [Events4FriendsBotApp]: Connected as ' + this._firebaseApp.name);        
+    } 
 
     /**
      * @private
      */
     _getInfo = (aCallback) => {
-        const that = this;
-        const db = this._firebaseApp.firestore();
-        db.collection("services").get()
-        .then(function(querySnapshot) {
-            const services = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
-            
-            db.collection("events").get()
-            .then(function(querySnapshot) {
-                const events = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
-                
-                let message = '';
-                
-                message += that._formatEvents(events);
-
-                message += 'Также на сайте доступна информация о ';
-                message += '[сообществах](https://events4friends.ru/#/communities) и ';
-                message += '[услугах](https://events4friends.ru/#/services)';
-                
-                aCallback(message)
-            })
-            .catch(function(error) {
-                console.warn("Error getting services, skip: ", error);
-                aCallback(
-                    'Увы, произошла неизвестная ошибка. ' + 
-                    'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
-                );
-            });
-        })
-        .catch(function(error) {
-            console.warn("Error getting services, skip: ", error);
-            aCallback(
-                'Увы, произошла неизвестная ошибка. ' + 
-                'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
-            );
-        });
+      const db = this._firebaseApp.firestore();
+      dbReadEvents(db,
+        function (events) { 
+          const message = verboseEventsList(events);
+          aCallback(message);
+        },
+        function (errorMessage) {
+          aCallback(errorMessage)
+        },
+      );
     }
 
     /**
@@ -228,8 +99,7 @@ class MyFirstBotApp {
                     })
                     .then(() => {
                         console.log('Message has pinned, save pinned message ID:', data.message_id);
-                        this._pinnedMessageId = data.message_id
-                        aCallback()
+                        aCallback(data.message_id)
                     })
                     .catch((error) => {
                         console.log('Error pinning message:', error);
@@ -244,58 +114,105 @@ class MyFirstBotApp {
 
     /**
      * @param {Object} bot
+     * @param {number} chatId
+     * @param {number} pinnedMessageId
      * @param {function} aCallback
      * @private
      */
-    _updatePinnedMessage(bot, aCallback) {
-        this._getInfo((aMessage) => {
-            bot.editMessageText(aMessage, {                
-                chat_id: this._chatId,
-                message_id: this._pinnedMessageId,
-                text: aMessage,
-                parse_mode: "Markdown",
-                disable_web_page_preview: true, 
-            })
-            .then(() => {
-                console.log('Message has edited');
-                aCallback();
-            })
-            .catch((error) => {
-                console.log('Failed editing message:', error);
-                console.log('Send and pin new instead');
-                if (error 
-                    && error.response 
-                    && error.response.body
-                    && error.response.body.description
-                    && error.response.body.description ===
-                        'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message'
-                ) {
-                    console.log('Message is not modified: skip updating');
-                } else {
-                    this._sendMessageToChatAndPin(bot, () => {
-                        console.log('Succesfully send and pin new message');
-                    })
-                }
-            });
+    _updatePinnedMessage(bot, chatId, pinnedMessageId, aCallback) {
+      this._getInfo((aMessage) => {
+        bot.editMessageText(aMessage, {                
+          chat_id: chatId,
+          message_id: pinnedMessageId,
+          text: aMessage,
+          parse_mode: "Markdown",
+          disable_web_page_preview: true, 
         })
+        .then(() => {
+          console.log('Message has edited');
+          aCallback();
+        })
+        .catch((error) => {
+          console.log('Failed editing message:', error);
+        });
+      })
     }
 
     /**
+     * Функция обрабатывает команду пользователя '/update'
+     * 
      * @param {Object} bot
+     * @param {Object} msg
      * @public
      */
-    updatePinnedMessage = (bot) => {
-        if (this._pinnedMessageId) {
-            console.log('There is pinned message: ', this._pinnedMessageId)
-            this._updatePinnedMessage(bot, () => {
-                console.log('updatePinnedMessage callback')
-            })
-        } else {
-            console.log('No pinned message found, create new one...')
-            this._sendMessageToChatAndPin(bot, () => {
-                console.log('sendMessageToChatAndPin callback')
-            })    
-        }
+    handleUpdateCommand = (bot, msg) => {
+      const that = this;
+      const db = this._firebaseApp.firestore();
+      dbPinnedMessages.dbReadPinnedMessages(db,
+        function (pinnedMessages) {
+          const pinnedMessage = getPinnedMessage(pinnedMessages, DEFAULT_COMMUNITY_ID);
+
+          if (pinnedMessage) {
+            //
+            // NOTE!
+            // Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
+            // https://github.com/VadimCpp/events4friends-firestore#%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82%D0%BE%D1%80%D1%8B-%D0%B7%D0%B0%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9
+            //
+            // Сравнение даты происходит путем сравнения строк (например "2020-11-09")
+            //
+            const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+
+            if (today === pinnedMessages.date) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
+              
+              if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
+
+                that._updatePinnedMessage(bot, pinnedMessage.chatId, pinnedMessage.pinnedMessageId, () => {});
+
+              } else if (pinnedMessage.chatId && !pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении не найдена
+                that._sendMessageToChatAndPin(bot, function (messageId) {
+                  dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+                });
+
+              } else { // Ошибка данных в firebase
+                bot.sendMessage(
+                  msg.chat.id,
+                  'Не могу найти чат, к которому относится закрепленное сообщение. ' + 
+                  'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+                );
+              }
+
+            } else { // Текущая дата не совпадает с датой закрепленного сообщения в базе данных.
+
+              if (pinnedMessage.chatId) { // Информация о чате сообщества найдена
+                that._sendMessageToChatAndPin(bot, function (messageId) {
+                  dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+                });
+
+              } else { // Ошибка данных в firebase
+                bot.sendMessage(
+                  msg.chat.id,
+                  'Невозможно найти чат, к которому относится закрепленное сообщение. ' + 
+                  'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+                );
+              }
+
+            }
+
+          } else {
+            bot.sendMessage(
+              msg.chat.id,
+              'Произошла ошибка при получении информации о закрепленном сообщении. ' + 
+              'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+            );
+          }
+        },
+        function (errorMessage) {
+          bot.sendMessage(
+            msg.chat.id,
+            errorMessage
+          );
+        },
+      );
     }
 
     // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
@@ -352,7 +269,7 @@ class MyFirstBotApp {
                     // NOTE!
                     // Фильтруем события: оставляем только те, которые будут сегодня.
                     //
-                    events = events.filter(event => moment(event.start).isSame(new Date(), 'day'));
+                    events = events.filter(event => moment(event.start, FIREBASE_DATE_FORMAT).isSame(new Date(), 'day'));
 
                     //
                     // NOTE!
@@ -478,7 +395,7 @@ class MyFirstBotApp {
                     // NOTE!
                     // Фильтруем события: оставляем только те, которые будут сегодня.
                     //
-                    events = events.filter(event => moment(event.start).isSame(new Date(), 'day'));
+                    events = events.filter(event => moment(event.start, FIREBASE_DATE_FORMAT).isSame(new Date(), 'day'));
 
                     //
                     // NOTE!
@@ -569,7 +486,7 @@ class MyFirstBotApp {
                     });                 
                 })
             } else if (messageText === '/update') {
-                this.updatePinnedMessage(bot);
+                this.handleUpdateCommand(bot, msg);
             } else if (messageText === '/remind') {
                 this.handleRemindCommand(bot, msg);
             } else if (messageText === '/testpush') {
@@ -624,4 +541,4 @@ class MyFirstBotApp {
     }
 }
 
-module.exports = MyFirstBotApp;
+module.exports = Events4FriendsBotApp;
