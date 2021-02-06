@@ -57,7 +57,7 @@ const verboseEventsList = (events) => {
       if (i < MAX_DISPLAYED_COUNT) {
         const event = events[i];
 
-        message += `${verboseDateTime(event)} － «${event.summary}»`;
+        message += `${verboseDateTime(event)} － ${event.summary}`;
         if (event.isOnline) {
             message += '🕸 Онлайн ';
         } else {
