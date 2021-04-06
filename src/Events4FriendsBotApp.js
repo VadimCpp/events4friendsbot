@@ -11,6 +11,7 @@ const getUserName = require('./utils/getUserName');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const PINNED_MESSAGE_DATE_FORMAT = 'YYYY-MM-DD';
+const LOG_CHAT_ID = '-1001191278325';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
 const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
 const DEFAULT_COMMUNITY_ID = 1;
@@ -100,6 +101,15 @@ class Events4FriendsBotApp {
         console.log('Error sending message:', error);
       });
     });
+  }
+
+  /**
+   * Обновить закрепленное сообщение.
+   *
+   * @param {Object} bot
+   */
+  updatePinnedMessage(bot) {
+    bot.sendMessage(LOG_CHAT_ID, '🎫 Мероприятия на сайте обновлены');
   }
 
   /**
