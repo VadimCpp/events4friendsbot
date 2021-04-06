@@ -142,6 +142,22 @@ class Events4FriendsBotApp {
   }
 
   /**
+   * Функция обрабатывает команду пользователя '/info'
+   * 
+   * @param {Object} bot
+   * @param {Object} msg
+   * @public
+   */
+  handleInfoCommand(bot, msg) {
+    this._getInfo().then(aMessage => {
+      bot.sendMessage(msg.chat.id, aMessage, {                
+        parse_mode: "Markdown",
+        disable_web_page_preview: true,                        
+      });                 
+    });
+  }
+
+  /**
    * Функция обрабатывает команду пользователя '/update'
    * 
    * @param {Object} bot
@@ -509,12 +525,7 @@ class Events4FriendsBotApp {
         });                
   
       } else if (messageText === '/info') {
-        this._getInfo().then((aMessage) => {
-          bot.sendMessage(msg.chat.id, aMessage, {                
-            parse_mode: "Markdown",
-            disable_web_page_preview: true,                        
-          });                 
-        });
+        this.handleInfoCommand(bot, msg);
       } else if (messageText === '/update') {
         this.handleUpdateCommand(bot, msg);
       } else if (messageText === '/remind') {
