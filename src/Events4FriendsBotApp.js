@@ -56,17 +56,17 @@ class Events4FriendsBotApp {
     /**
      * @private
      */
-    _getInfo = (aCallback) => {
-      const db = this._firebaseApp.firestore();
-      dbReadEvents(db,
-        function (events) { 
+    _getInfo = () => {
+      return new Promise((resolve) => {
+        const db = this._firebaseApp.firestore();
+        dbReadEvents(db).then((events) => { 
           const message = verboseEventsList(events);
-          aCallback(message);
-        },
-        function (errorMessage) {
-          aCallback(errorMessage)
-        },
-      );
+          resolve(message);
+        }).catch(error => {
+          console.log(error);
+          resolve('Увы, произошла неизвестная ошибка. Пожалуйста, обратитесь в техническую поддержку: @frontendbasics');
+        });  
+      });
     }
 
     /**
@@ -86,7 +86,7 @@ class Events4FriendsBotApp {
      * @private
      */
     _sendMessageToChatAndPin(bot, aCallback) {
-        this._getInfo((aMessage) => {
+        this._getInfo().then((aMessage) => {
             bot.sendMessage(this._chatId, aMessage, {                
                 parse_mode: "Markdown",
                 disable_web_page_preview: true,                        
@@ -120,7 +120,7 @@ class Events4FriendsBotApp {
      * @private
      */
     _updatePinnedMessage(bot, chatId, pinnedMessageId, aCallback) {
-      this._getInfo((aMessage) => {
+      this._getInfo().then((aMessage) => {
         bot.editMessageText(aMessage, {                
           chat_id: chatId,
           message_id: pinnedMessageId,
@@ -479,7 +479,7 @@ class Events4FriendsBotApp {
                 });                
         
             } else if (messageText === '/info') {
-                this._getInfo((aMessage) => {
+                this._getInfo().then((aMessage) => {
                     bot.sendMessage(msg.chat.id, aMessage, {                
                         parse_mode: "Markdown",
                         disable_web_page_preview: true,                        
