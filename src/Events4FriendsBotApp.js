@@ -70,17 +70,6 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * У личных чатов положительные ID
-   *
-   * @param {Object} msg
-   * @return {boolean}
-   * @private
-   */
-  _isPrivateMsg(msg) {
-    return msg.chat.id > 0;
-  }
-
-  /**
    * Отправить и закрепить сообщение в чат
    *
    * @param {Object} bot
@@ -528,7 +517,9 @@ class Events4FriendsBotApp {
     console.log(JSON.stringify(msg));
 
     const messageText = msg.text;
-    if (this._isPrivateMsg(msg)) {
+    const isPrivateMsg = msg.chat.id > 0;
+
+    if (isPrivateMsg) {
       if (messageText === '/start') {
         this.handleStartCommand(bot, msg);
       } else if (messageText === '/info') {
