@@ -7,6 +7,7 @@ const verboseEventsList = require('./verbose/eventsList.js');
 const dbReadEvents = require('./collections/events.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
+const getUserName = require('./utils/getUserName');
 const e = require('express');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
@@ -150,7 +151,7 @@ class Events4FriendsBotApp {
    */
   handleStartCommand(bot, msg) {
     const messageText =
-      'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
+      'Здравствуйте, ' + getUserName(msg) + ".\n\n" +
       'Этот бот создан для телеграм чата @events4friends. ' + 
       'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
       'и обновляет информацию в закрепленном сообщении чата.\n\n' +
@@ -507,7 +508,7 @@ class Events4FriendsBotApp {
    */
   handleDefault(bot, msg) {
     const messageText =
-      'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
+      'Уважаемый(ая) ' + getUserName(msg) + ".\n\n" +
       'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
     bot.sendMessage(msg.chat.id, messageText, {                
       parse_mode: "Markdown",
@@ -526,6 +527,7 @@ class Events4FriendsBotApp {
     console.log('');
     console.log(JSON.stringify(msg));
 
+    const messageText = msg.text;
     if (this._isPrivateMsg(msg)) {
       if (messageText === '/start') {
         this.handleStartCommand(bot, msg);
@@ -541,26 +543,6 @@ class Events4FriendsBotApp {
         this.handleDefault(bot, msg);               
       }
     }
-  }
-
-  /**
-   * @param {Object} msg
-   * @return {string}
-   * @private
-   */
-  _getName(msg) {
-    let result = 'Без имени 👤';
-    let fname = msg.from.first_name;
-    let lname = msg.from.last_name;
-    let uname = msg.from.username;
-
-    if (fname) {
-      result = fname + (lname ? ' ' + lname : '') ;    
-    } else if (uname) {
-      result = uname;
-    }
-
-    return result;
   }
 }
 
