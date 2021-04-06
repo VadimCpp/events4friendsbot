@@ -8,7 +8,6 @@ const dbReadEvents = require('./collections/events.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
-const e = require('express');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 const PINNED_MESSAGE_DATE_FORMAT = 'YYYY-MM-DD';
