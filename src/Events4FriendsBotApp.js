@@ -463,6 +463,23 @@ class Events4FriendsBotApp {
   }
 
   /**
+   * Текст пользователю по умолчанию
+   *
+   * @param {Object} bot
+   * @param {Object} msg
+   * @public
+   */
+  handleDefault(bot, msg) {
+    const messageText =
+      'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
+      'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
+    bot.sendMessage(msg.chat.id, messageText, {                
+      parse_mode: "Markdown",
+      disable_web_page_preview: true,                        
+    }); 
+  }
+
+  /**
    * Main event handler
    *
    * @param {Object} msg
@@ -505,16 +522,8 @@ class Events4FriendsBotApp {
       } else if (messageText === '/testpush') {
         this.handleTestpushCommand(bot, msg);
       } else {
-        messageText =
-          'Уважаемый(ая) ' + this._getName(msg) + ".\n\n" +
-          'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-        bot.sendMessage(msg.chat.id, messageText, {                
-          parse_mode: "Markdown",
-          disable_web_page_preview: true,                        
-        });                
+        this.handleDefault(bot, msg);               
       }
-    } else {
-      console.log('Ignore group chats');               
     }
   }
 
