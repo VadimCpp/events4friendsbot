@@ -142,6 +142,26 @@ class Events4FriendsBotApp {
   }
 
   /**
+   * Функция обрабатывает команду пользователя '/start'
+   * 
+   * @param {Object} bot
+   * @param {Object} msg
+   * @public
+   */
+  handleStartCommand(bot, msg) {
+    const messageText =
+      'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
+      'Этот бот создан для телеграм чата @events4friends. ' + 
+      'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
+      'и обновляет информацию в закрепленном сообщении чата.\n\n' +
+      'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
+    bot.sendMessage(msg.chat.id, messageText, {                
+      parse_mode: "Markdown",
+      disable_web_page_preview: true,                        
+    });
+  }
+
+  /**
    * Функция обрабатывает команду пользователя '/info'
    * 
    * @param {Object} bot
@@ -507,23 +527,8 @@ class Events4FriendsBotApp {
     console.log(JSON.stringify(msg));
 
     if (this._isPrivateMsg(msg)) {
-      /**
-       * @type {string}
-       */
-      let messageText = msg.text;
-
       if (messageText === '/start') {
-        messageText =
-          'Здравствуйте, ' + this._getName(msg) + ".\n\n" +
-          'Этот бот создан для телеграм чата @events4friends. ' + 
-          'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
-          'и обновляет информацию в закрепленном сообщении чата.\n\n' +
-          'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-        bot.sendMessage(msg.chat.id, messageText, {                
-          parse_mode: "Markdown",
-          disable_web_page_preview: true,                        
-        });                
-  
+        this.handleStartCommand(bot, msg);
       } else if (messageText === '/info') {
         this.handleInfoCommand(bot, msg);
       } else if (messageText === '/update') {
