@@ -4,7 +4,7 @@ const moment = require('moment');
 require('moment/locale/ru');
 
 const verboseEventsList = require('./verbose/eventsList.js');
-const verboseDateTime = require('./dateTime.js');
+const verboseDateTime = require('./verbose/dateTime.js');
 const dbReadEvents = require('./collections/events.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
