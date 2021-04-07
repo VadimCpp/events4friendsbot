@@ -4,6 +4,7 @@ const moment = require('moment');
 require('moment/locale/ru');
 
 const verboseEventsList = require('./verbose/eventsList.js');
+const verboseDateTime = require('./dateTime.js');
 const dbReadEvents = require('./collections/events.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
@@ -107,9 +108,19 @@ class Events4FriendsBotApp {
    * Обновить закрепленное сообщение.
    *
    * @param {Object} bot
+   * @param {Object} event данные о мероприятии
+   * @param {string} userName имя администратора сайта
    */
   updatePinnedMessage(bot, event, userName) {
-    bot.sendMessage(LOG_CHAT_ID, `🎫 Мероприятие обновлено:\n${JSON.stringify(event)}\n${userName}`);
+    let type = '';
+    if (event.create) {
+      type = ' создал(а)';
+    } else if (event.delete) {
+      type = ' улалил(а)';
+    } else if (event.edit) {
+      type = ' изменил(а)';
+    }
+    bot.sendMessage(LOG_CHAT_ID, `🎫 ${userName}${type}:\n${event.summary}\n${verboseDateTime(event)}`);
   }
 
   /**
