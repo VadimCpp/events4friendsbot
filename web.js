@@ -54,8 +54,10 @@ module.exports = function(bot) {
       console.log('body:', req.body);
       const { event, userName } = req.body;
       bot.updatePinnedMessage(event, userName);
+      res.sendStatus(200);
     } else {
       console.warn('Ignore /update request from unknown resource')
+      res.sendStatus(404);
     }
   });
 };
