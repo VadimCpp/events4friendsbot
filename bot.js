@@ -17,7 +17,7 @@ if (isProduction) {
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-bot.updatePinnedMessage = () => events4FriendsBot.updatePinnedMessage(bot)
+bot.updatePinnedMessage = (event, userName) => events4FriendsBot.updatePinnedMessage(bot, event, userName)
 bot.on('message', (msg) => {
   events4FriendsBot.handleMessage(msg, bot);
 });

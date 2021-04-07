@@ -108,8 +108,8 @@ class Events4FriendsBotApp {
    *
    * @param {Object} bot
    */
-  updatePinnedMessage(bot) {
-    bot.sendMessage(LOG_CHAT_ID, '🎫 Мероприятия на сайте обновлены');
+  updatePinnedMessage(bot, event, userName) {
+    bot.sendMessage(LOG_CHAT_ID, `🎫 Мероприятие обновлено:\n${JSON.stringify(event)}\n${userName}`);
   }
 
   /**
