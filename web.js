@@ -51,6 +51,7 @@ module.exports = function(bot) {
   app.post('/update', function (req, res) {
     console.log('origin:', req.get('origin'));
     if (req.get('origin') === 'https://events4friends.ru') {
+      console.log('body:', req.body);
       const { event, userName } = req.body;
       bot.updatePinnedMessage(event, userName);
     } else {
