@@ -116,11 +116,11 @@ class Events4FriendsBotApp {
     if (event.create) {
       type = ' создал(а)';
     } else if (event.delete) {
-      type = ' улалил(а)';
+      type = ' удалил(а)';
     } else if (event.edit) {
       type = ' изменил(а)';
     }
-    bot.sendMessage(LOG_CHAT_ID, `🎫 ${userName}${type}:\n${event.summary}\n${verboseDateTime(event)}`);
+    bot.sendMessage(LOG_CHAT_ID, `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}`);
   }
 
   /**
