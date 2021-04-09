@@ -103,7 +103,86 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Обновить закрепленное сообщение.
+   * Функция обрабатывает команду пользователя '/update'
+   * 
+   * @param {Object} bot
+   * @param {string} chatId
+   * @public
+   */
+  _handleUpdateCommand = (bot, chatId) => {
+    const that = this;
+    const db = this._firebaseApp.firestore();
+    dbPinnedMessages
+      .dbReadPinnedMessages(db)
+      .then((pinnedMessages) => {
+        const pinnedMessage = getPinnedMessage(pinnedMessages, DEFAULT_COMMUNITY_ID);
+
+        if (pinnedMessage) {
+          //
+          // NOTE!
+          // Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
+          // https://github.com/VadimCpp/events4friends-firestore#%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82%D0%BE%D1%80%D1%8B-%D0%B7%D0%B0%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9
+          //
+          // Сравнение даты происходит путем сравнения строк (например "2020-11-09")
+          //
+          const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+
+          if (today.localeCompare(pinnedMessage.date) === 0) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
+            
+            if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
+
+              that._updatePinnedMessage(bot, pinnedMessage.chatId, pinnedMessage.pinnedMessageId, () => {});
+
+            } else if (pinnedMessage.chatId && !pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении не найдена
+              that._sendMessageToChatAndPin(bot, function (messageId) {
+                dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+              });
+
+            } else { // Ошибка данных в firebase
+              bot.sendMessage(
+                chatId,
+                'Не могу найти чат, к которому относится закрепленное сообщение. ' + 
+                'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+              );
+            }
+
+          } else { // Текущая дата не совпадает с датой закрепленного сообщения в базе данных.
+
+            if (pinnedMessage.chatId) { // Информация о чате сообщества найдена
+              that._sendMessageToChatAndPin(bot, function (messageId) {
+                dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+              });
+
+            } else { // Ошибка данных в firebase
+              bot.sendMessage(
+                chatId,
+                'Невозможно найти чат, к которому относится закрепленное сообщение. ' + 
+                'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+              );
+            }
+
+          }
+
+        } else {
+          bot.sendMessage(
+            chatId,
+            'Произошла ошибка при получении информации о закрепленном сообщении. ' + 
+            'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
+          );
+        }
+      }
+    )
+    .catch((errorMessage) => {
+        bot.sendMessage(
+          chatId,
+          errorMessage
+        );
+      }
+    );
+  }
+  
+  /**
+   * Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
    *
    * @param {Object} bot
    * @param {Object} event данные о мероприятии
@@ -132,6 +211,8 @@ class Events4FriendsBotApp {
         disable_web_page_preview: true, 
       },
     );
+
+    this._handleUpdateCommand(bot, LOG_CHAT_ID);
   }
 
   /**
@@ -206,75 +287,7 @@ class Events4FriendsBotApp {
    * @public
    */
   handleUpdateCommand = (bot, msg) => {
-    const that = this;
-    const db = this._firebaseApp.firestore();
-    dbPinnedMessages
-      .dbReadPinnedMessages(db)
-      .then((pinnedMessages) => {
-        const pinnedMessage = getPinnedMessage(pinnedMessages, DEFAULT_COMMUNITY_ID);
-
-        if (pinnedMessage) {
-          //
-          // NOTE!
-          // Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
-          // https://github.com/VadimCpp/events4friends-firestore#%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82%D0%BE%D1%80%D1%8B-%D0%B7%D0%B0%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9
-          //
-          // Сравнение даты происходит путем сравнения строк (например "2020-11-09")
-          //
-          const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
-
-          if (today.localeCompare(pinnedMessage.date) === 0) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
-            
-            if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
-
-              that._updatePinnedMessage(bot, pinnedMessage.chatId, pinnedMessage.pinnedMessageId, () => {});
-
-            } else if (pinnedMessage.chatId && !pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении не найдена
-              that._sendMessageToChatAndPin(bot, function (messageId) {
-                dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
-              });
-
-            } else { // Ошибка данных в firebase
-              bot.sendMessage(
-                msg.chat.id,
-                'Не могу найти чат, к которому относится закрепленное сообщение. ' + 
-                'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
-              );
-            }
-
-          } else { // Текущая дата не совпадает с датой закрепленного сообщения в базе данных.
-
-            if (pinnedMessage.chatId) { // Информация о чате сообщества найдена
-              that._sendMessageToChatAndPin(bot, function (messageId) {
-                dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
-              });
-
-            } else { // Ошибка данных в firebase
-              bot.sendMessage(
-                msg.chat.id,
-                'Невозможно найти чат, к которому относится закрепленное сообщение. ' + 
-                'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
-              );
-            }
-
-          }
-
-        } else {
-          bot.sendMessage(
-            msg.chat.id,
-            'Произошла ошибка при получении информации о закрепленном сообщении. ' + 
-            'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
-          );
-        }
-      }
-    )
-    .catch((errorMessage) => {
-        bot.sendMessage(
-          msg.chat.id,
-          errorMessage
-        );
-      }
-    );
+    this._handleUpdateCommand(bot, msg.chat.id);
   }
 
   /**
