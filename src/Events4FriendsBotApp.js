@@ -131,11 +131,11 @@ class Events4FriendsBotApp {
             
             if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
 
-              that._updatePinnedMessage(bot, pinnedMessage.chatId, pinnedMessage.pinnedMessageId, () => {});
+              that._updatePinnedMessage(bot, pinnedMessage.communityId, pinnedMessage.pinnedMessageId, () => {});
 
             } else if (pinnedMessage.chatId && !pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении не найдена
               that._sendMessageToChatAndPin(bot, function (messageId) {
-                dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+                dbPinnedMessages.dbWritePinnedMessage(db, messageId, pinnedMessage.communityId, today, () => {}, () => {});
               });
 
             } else { // Ошибка данных в firebase
@@ -150,7 +150,7 @@ class Events4FriendsBotApp {
 
             if (pinnedMessage.chatId) { // Информация о чате сообщества найдена
               that._sendMessageToChatAndPin(bot, function (messageId) {
-                dbPinnedMessages.dbWritePinnedMessage(db, messageId, that._chatId, today, () => {}, () => {});
+                dbPinnedMessages.dbWritePinnedMessage(db, messageId, pinnedMessage.communityId, today, () => {}, () => {});
               });
 
             } else { // Ошибка данных в firebase
