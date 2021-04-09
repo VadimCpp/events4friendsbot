@@ -208,8 +208,9 @@ class Events4FriendsBotApp {
   handleUpdateCommand = (bot, msg) => {
     const that = this;
     const db = this._firebaseApp.firestore();
-    dbPinnedMessages.dbReadPinnedMessages(db,
-      function (pinnedMessages) {
+    dbPinnedMessages
+      .dbReadPinnedMessages(db)
+      .then((pinnedMessages) => {
         const pinnedMessage = getPinnedMessage(pinnedMessages, DEFAULT_COMMUNITY_ID);
 
         if (pinnedMessage) {
@@ -265,13 +266,14 @@ class Events4FriendsBotApp {
             'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
           );
         }
-      },
-      function (errorMessage) {
+      }
+    )
+    .catch((errorMessage) => {
         bot.sendMessage(
           msg.chat.id,
           errorMessage
         );
-      },
+      }
     );
   }
 
