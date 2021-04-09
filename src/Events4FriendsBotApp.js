@@ -120,7 +120,13 @@ class Events4FriendsBotApp {
     } else if (event.edit) {
       type = ' изменил(а)';
     }
-    bot.sendMessage(LOG_CHAT_ID, `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}`);
+
+    let link = '';
+    if (event.id) {
+      link = `\n[Подробнее...](https://events4friends.ru/#/event/${event.id})`;
+    }
+
+    bot.sendMessage(LOG_CHAT_ID, `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}${link}`);
   }
 
   /**
