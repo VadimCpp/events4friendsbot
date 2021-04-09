@@ -19,14 +19,14 @@ const dbReadPinnedMessages = (db) => {
  * Функция читает из базы список услуг
  * @param {object} db - база данных firestore
  * @param {number | string} msgId - номер сообщения
- * @param {number | string} chatId - id чата
+ * @param {number | string} communityId - id чата
  * @param {string} date - дата в формате 'YYYY-MM-DD'
  * @param {Function} onSuccess - без параметров
  * @param {Function} onError - в параметрах текст ошибки для пользователя
  */
-const dbWritePinnedMessage = (db, msgId, chatId, date, onSuccess, onError) => {
+const dbWritePinnedMessage = (db, msgId, communityId, date, onSuccess, onError) => {
   db.collection("pinnedMessages").doc("test").set({
-    communityId: chatId,
+    communityId: communityId,
     chatName: "events4friends",
     pinnedMessageId: msgId,
     date,
