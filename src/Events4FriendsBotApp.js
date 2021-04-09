@@ -126,7 +126,14 @@ class Events4FriendsBotApp {
       link = `\n[Подробнее...](https://events4friends.ru/#/event/${event.id})`;
     }
 
-    bot.sendMessage(LOG_CHAT_ID, `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}${link}`);
+    bot.sendMessage(
+      LOG_CHAT_ID,
+      `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}${link}`,
+      {
+        parse_mode: "Markdown",
+        disable_web_page_preview: true, 
+      },
+    );
   }
 
   /**
