@@ -223,7 +223,7 @@ class Events4FriendsBotApp {
           //
           const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
 
-          if (today === pinnedMessages.date) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
+          if (today.localeCompare(pinnedMessage.date) === 0) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
             
             if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
 
