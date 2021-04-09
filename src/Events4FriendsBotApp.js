@@ -58,16 +58,14 @@ class Events4FriendsBotApp {
    * Получение информации о мероприятиях
    */
   _getInfo = () => {
-    return new Promise((resolve) => {
-      const db = this._firebaseApp.firestore();
-      dbReadEvents(db).then((events) => { 
-        const message = verboseEventsList(events);
-        resolve(message);
-      }).catch(error => {
-        console.log(error);
-        resolve('Увы, произошла неизвестная ошибка. Пожалуйста, обратитесь в техническую поддержку: @frontendbasics');
-      });  
-    });
+    const db = this._firebaseApp.firestore();
+    return dbReadEvents(db).then((events) => { 
+      const message = verboseEventsList(events);
+      return message;
+    }).catch(error => {
+      console.log(error);
+      return 'Увы, произошла неизвестная ошибка. Пожалуйста, обратитесь в техническую поддержку: @frontendbasics';
+    });  
   }
 
   /**
