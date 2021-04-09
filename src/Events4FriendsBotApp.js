@@ -122,7 +122,7 @@ class Events4FriendsBotApp {
     }
 
     let link = '';
-    if (event.id) {
+    if (event.id && !event.delete) {
       link = `\n[Подробнее...](https://events4friends.ru/#/event/${event.id})`;
     }
 
