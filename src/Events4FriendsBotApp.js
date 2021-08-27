@@ -39,7 +39,7 @@ class Events4FriendsBotApp {
       "auth_provider_x509_cert_url": process.env.AUTH_PROVIDER_X509_CERT_URL,
       "client_x509_cert_url": process.env.CLIENT_X509_CERT_URL,
     }
-    
+
     this._adminId = '148045459'; // @vadimcpp
 
     /**
@@ -51,21 +51,21 @@ class Events4FriendsBotApp {
       databaseURL: process.env.DATABASE_URL
     }, 'events4friends-bot');
 
-    console.log(' 2️⃣  [Events4FriendsBotApp]: Connected as ' + this._firebaseApp.name);        
-  } 
+    console.log(' 2️⃣  [Events4FriendsBotApp]: Connected as ' + this._firebaseApp.name);
+  }
 
   /**
    * Получение информации о мероприятиях
    */
   _getInfo = () => {
     const db = this._firebaseApp.firestore();
-    return dbReadEvents(db).then((events) => { 
+    return dbReadEvents(db).then((events) => {
       const message = verboseEventsList(events);
       return message;
     }).catch(error => {
       console.log(error);
       return 'Увы, произошла неизвестная ошибка. Пожалуйста, обратитесь в техническую поддержку: @frontendbasics';
-    });  
+    });
   }
 
   /**
@@ -77,9 +77,9 @@ class Events4FriendsBotApp {
    */
   _sendMessageToChatAndPin(bot, aCallback) {
     this._getInfo().then((aMessage) => {
-      bot.sendMessage(this._chatId, aMessage, {                
+      bot.sendMessage(this._chatId, aMessage, {
         parse_mode: "Markdown",
-        disable_web_page_preview: true,                        
+        disable_web_page_preview: true,
       })
       .then((data) => {
         console.log('Message has sent');
@@ -104,7 +104,7 @@ class Events4FriendsBotApp {
 
   /**
    * Функция обрабатывает команду пользователя '/update'
-   * 
+   *
    * @param {Object} bot
    * @param {string} chatId
    * @public
@@ -128,7 +128,7 @@ class Events4FriendsBotApp {
           const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
 
           if (today.localeCompare(pinnedMessage.date) === 0) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
-            
+
             if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
 
               that._updatePinnedMessage(bot, pinnedMessage.communityId, pinnedMessage.pinnedMessageId, () => {});
@@ -141,7 +141,7 @@ class Events4FriendsBotApp {
             } else { // Ошибка данных в firebase
               bot.sendMessage(
                 chatId,
-                'Не могу найти чат, к которому относится закрепленное сообщение. ' + 
+                'Не могу найти чат, к которому относится закрепленное сообщение. ' +
                 'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
               );
             }
@@ -156,7 +156,7 @@ class Events4FriendsBotApp {
             } else { // Ошибка данных в firebase
               bot.sendMessage(
                 chatId,
-                'Невозможно найти чат, к которому относится закрепленное сообщение. ' + 
+                'Невозможно найти чат, к которому относится закрепленное сообщение. ' +
                 'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
               );
             }
@@ -166,7 +166,7 @@ class Events4FriendsBotApp {
         } else {
           bot.sendMessage(
             chatId,
-            'Произошла ошибка при получении информации о закрепленном сообщении. ' + 
+            'Произошла ошибка при получении информации о закрепленном сообщении. ' +
             'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
           );
         }
@@ -180,7 +180,7 @@ class Events4FriendsBotApp {
       }
     );
   }
-  
+
   /**
    * Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
    *
@@ -208,7 +208,7 @@ class Events4FriendsBotApp {
       `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}${link}`,
       {
         parse_mode: "Markdown",
-        disable_web_page_preview: true, 
+        disable_web_page_preview: true,
       },
     );
 
@@ -226,12 +226,12 @@ class Events4FriendsBotApp {
    */
   _updatePinnedMessage(bot, chatId, pinnedMessageId, aCallback) {
     this._getInfo().then((aMessage) => {
-      bot.editMessageText(aMessage, {                
+      bot.editMessageText(aMessage, {
         chat_id: chatId,
         message_id: pinnedMessageId,
         text: aMessage,
         parse_mode: "Markdown",
-        disable_web_page_preview: true, 
+        disable_web_page_preview: true,
       })
       .then(() => {
         console.log('Message has edited');
@@ -245,7 +245,7 @@ class Events4FriendsBotApp {
 
   /**
    * Функция обрабатывает команду пользователя '/start'
-   * 
+   *
    * @param {Object} bot
    * @param {Object} msg
    * @public
@@ -253,35 +253,35 @@ class Events4FriendsBotApp {
   handleStartCommand(bot, msg) {
     const messageText =
       'Здравствуйте, ' + getUserName(msg) + ".\n\n" +
-      'Этот бот создан для телеграм чата @events4friends. ' + 
-      'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' + 
+      'Этот бот создан для телеграм чата @events4friends. ' +
+      'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' +
       'и обновляет информацию в закрепленном сообщении чата.\n\n' +
       'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-    bot.sendMessage(msg.chat.id, messageText, {                
+    bot.sendMessage(msg.chat.id, messageText, {
       parse_mode: "Markdown",
-      disable_web_page_preview: true,                        
+      disable_web_page_preview: true,
     });
   }
 
   /**
    * Функция обрабатывает команду пользователя '/info'
-   * 
+   *
    * @param {Object} bot
    * @param {Object} msg
    * @public
    */
   handleInfoCommand(bot, msg) {
     this._getInfo().then(aMessage => {
-      bot.sendMessage(msg.chat.id, aMessage, {                
+      bot.sendMessage(msg.chat.id, aMessage, {
         parse_mode: "Markdown",
-        disable_web_page_preview: true,                        
-      });                 
+        disable_web_page_preview: true,
+      });
     });
   }
 
   /**
    * Функция обрабатывает команду пользователя '/update'
-   * 
+   *
    * @param {Object} bot
    * @param {Object} msg
    * @public
@@ -292,7 +292,7 @@ class Events4FriendsBotApp {
 
   /**
    * Команда отправляет на мобильные устройства PUSH уведомление
-   * 
+   *
    * NOTE!
    * Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
    */
@@ -331,7 +331,7 @@ class Events4FriendsBotApp {
 
       //
       // NOTE!
-      // Получаем напоминания reminders из базы данных 
+      // Получаем напоминания reminders из базы данных
       //
       db.collection("reminders").get()
       .then(function(querySnapshot) {
@@ -339,7 +339,7 @@ class Events4FriendsBotApp {
 
         //
         // NOTE!
-        // Получаем напоминания events из базы данных 
+        // Получаем напоминания events из базы данных
         //
         db.collection("events").get()
         .then(function(eventsSnapshot) {
@@ -378,7 +378,7 @@ class Events4FriendsBotApp {
                 return {
                   summary: event.summary,
                   ...reminder,
-                }    
+                }
               }
             }
             return reminder;
@@ -401,7 +401,7 @@ class Events4FriendsBotApp {
         .catch(function(error) {
           console.warn("Error getting events, skip: ", error);
           aCallback(
-            'Увы, произошла неизвестная ошибка. ' + 
+            'Увы, произошла неизвестная ошибка. ' +
             'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
           );
         });
@@ -409,7 +409,7 @@ class Events4FriendsBotApp {
       .catch(function(error) {
         console.warn("Error getting reminders, skip: ", error);
         aCallback(
-          'Увы, произошла неизвестная ошибка. ' + 
+          'Увы, произошла неизвестная ошибка. ' +
           'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
         );
       });
@@ -423,7 +423,7 @@ class Events4FriendsBotApp {
 
   /**
    * Отправка тестового PUSH уведомления
-   * 
+   *
    * NOTE!
    * Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
    */
@@ -462,7 +462,7 @@ class Events4FriendsBotApp {
 
       //
       // NOTE!
-      // Получаем напоминания reminders из базы данных 
+      // Получаем напоминания reminders из базы данных
       //
       db.collection("reminders").get()
       .then(function(querySnapshot) {
@@ -470,7 +470,7 @@ class Events4FriendsBotApp {
 
         //
         // NOTE!
-        // Получаем напоминания events из базы данных 
+        // Получаем напоминания events из базы данных
         //
         db.collection("events").get()
         .then(function(eventsSnapshot) {
@@ -514,7 +514,7 @@ class Events4FriendsBotApp {
         .catch(function(error) {
           console.warn("Error getting events, skip: ", error);
           aCallback(
-            'Увы, произошла неизвестная ошибка. ' + 
+            'Увы, произошла неизвестная ошибка. ' +
             'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
           );
         });
@@ -522,7 +522,7 @@ class Events4FriendsBotApp {
       .catch(function(error) {
         console.warn("Error getting reminders, skip: ", error);
         aCallback(
-          'Увы, произошла неизвестная ошибка. ' + 
+          'Увы, произошла неизвестная ошибка. ' +
           'Обратитесь пожалуйста в техническую поддержку: @frontendbasics'
         );
       });
@@ -531,7 +531,7 @@ class Events4FriendsBotApp {
         msg.chat.id,
         "К сожалению, у Вас нет прав выполнить эту команду. Попробуйте /info"
       );
-    }        
+    }
   }
 
   /**
@@ -545,10 +545,10 @@ class Events4FriendsBotApp {
     const messageText =
       'Уважаемый(ая) ' + getUserName(msg) + ".\n\n" +
       'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-    bot.sendMessage(msg.chat.id, messageText, {                
+    bot.sendMessage(msg.chat.id, messageText, {
       parse_mode: "Markdown",
-      disable_web_page_preview: true,                        
-    }); 
+      disable_web_page_preview: true,
+    });
   }
 
   /**
@@ -577,7 +577,7 @@ class Events4FriendsBotApp {
       } else if (messageText === '/testpush') {
         this.handleTestpushCommand(bot, msg);
       } else {
-        this.handleDefault(bot, msg);               
+        this.handleDefault(bot, msg);
       }
     }
   }
