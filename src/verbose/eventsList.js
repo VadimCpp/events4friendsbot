@@ -29,12 +29,12 @@ const MAX_DISPLAYED_COUNT = 5;
 // и еще 3 предстоящих мероприятий...
 //
 //
-const verboseEventsList = (events) => {
-  const now = new Date(); 
+const verboseEventsList = (events, communityId = "1") => {
+  const now = new Date();
   let message = '';
 
   events = events.filter(event => {
-    return event.start && event.timezone
+    return event.communityId === communityId && event.start && event.timezone
       ? moment(`${event.start}${event.timezone}`, FIREBASE_DATE_FORMAT_WITH_UTC).toDate() > now
       : false;
   });
@@ -47,7 +47,7 @@ const verboseEventsList = (events) => {
     }
     return 0;
   });
-  
+
   let moreUpcomingEvents = 0;
 
   if (events.length > 0) {
