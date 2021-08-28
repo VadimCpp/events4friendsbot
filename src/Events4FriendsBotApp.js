@@ -204,10 +204,10 @@ class Events4FriendsBotApp {
   handleStartCommand(bot, msg) {
     const messageText =
       'Здравствуйте, ' + getUserName(msg) + ".\n\n" +
-      'Этот бот создан для телеграм чата @events4friends. ' +
-      'Бот следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' +
-      'и обновляет информацию в закрепленном сообщении чата.\n\n' +
-      'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
+      'Это бот-помощник. Он следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' +
+      'и обновляет информацию о предстоящих мероприятиях в закрепленном сообщении чата. ' +
+      'По вопросам работы бота пишите программисту [Вадиму Канинскому](https://vadimcpp.ru/?utm_source=telegram)\n\n' +
+      'Посмотреть предстоящие мероприятия ➡️ /info';
     bot.sendMessage(msg.chat.id, messageText, {
       parse_mode: "Markdown",
       disable_web_page_preview: true,
@@ -228,16 +228,19 @@ class Events4FriendsBotApp {
       dbReadEvents(db).then((events) => ({communities, events}))
     ).then(({communities, events}) => {
       console.log(`Got ${communities.length} communities and ${events.length} events`);
+      let aMessage = 'Анонсы какого сообщества Вам интересны?\n\n';
       communities.map((community) =>
-        bot.sendMessage(
-          msg.chat.id,
-          upcomingEvents(community, events),
-          {
-            parse_mode: "Markdown",
-            disable_web_page_preview: true,
-          }
-        )
+          aMessage += `${community.name} ➡️ /${community.slug}\n`
       );
+      bot.sendMessage(
+        msg.chat.id,
+        aMessage
+        // upcomingEvents(community, events),
+        // {
+        //   parse_mode: "Markdown",
+        //   disable_web_page_preview: true,
+        // }
+      )
     }).catch(error => {
       console.log(error);
     });
@@ -506,12 +509,29 @@ class Events4FriendsBotApp {
    * @public
    */
   handleDefault(bot, msg) {
-    const messageText =
-      'Уважаемый(ая) ' + getUserName(msg) + ".\n\n" +
-      'Введите команду /info, чтобы посмотреть инормацию об услугах и мероприятиях.';
-    bot.sendMessage(msg.chat.id, messageText, {
-      parse_mode: "Markdown",
-      disable_web_page_preview: true,
+    const db = this._firebaseApp.firestore();
+
+    dbReadCommunities(db).then((communities) => {
+      const aCommunity = communities.find((community) => `/${community.slug}` === msg.text);
+      if (aCommunity) {
+        return dbReadEvents(db).then((events) => ({community: aCommunity, events}));
+      }
+      return { community: null };
+    }).then(({community, events}) => {
+      const aMessage = community ?
+        upcomingEvents(community, events) :
+        'Извините, не понял 🙁\nПопробуйте команду /info';
+
+      return bot.sendMessage(
+        msg.chat.id,
+        aMessage,
+        {
+          parse_mode: "Markdown",
+          disable_web_page_preview: true,
+        }
+      )
+    }).catch(error => {
+      console.log(error);
     });
   }
 
