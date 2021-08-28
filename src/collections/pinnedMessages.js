@@ -16,29 +16,20 @@ const dbReadPinnedMessages = (db) => {
 }
 
 /**
- * Функция читает из базы список услуг
+ * Функция обновляет в базы список услуг
+ *
  * @param {object} db - база данных firestore
- * @param {number | string} msgId - номер сообщения
- * @param {number | string} communityId - id чата
+ * @param {number} msgId - номер сообщения
+ * @param {object} community - сообщество
  * @param {string} date - дата в формате 'YYYY-MM-DD'
- * @param {Function} onSuccess - без параметров
- * @param {Function} onError - в параметрах текст ошибки для пользователя
  */
-const dbWritePinnedMessage = (db, msgId, communityId, date, onSuccess, onError) => {
-  db.collection("pinnedMessages").doc("test").set({
-    communityId: communityId,
-    chatName: "events4friends",
+const dbWritePinnedMessage = (db, msgId, community, date) => {
+  return db.collection("pinnedMessages").doc(community.slug).set({
+    communityId: community.id,
+    chatName: community.name,
     pinnedMessageId: msgId,
     date,
-  }, { merge: true })
-  .then(onSuccess)
-  .catch(function(error) {
-    console.warn("Error write to pinnedMessages: ", error);
-    onError(
-      'Ошибка. Не удалось записать в базу сообщение. ' +
-      'Пожалуйста, в техническую поддержку: @frontendbasics'
-    );
-  });
+  }, { merge: true });
 }
 
 module.exports.dbReadPinnedMessages = dbReadPinnedMessages;

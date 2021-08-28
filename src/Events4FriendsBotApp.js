@@ -3,11 +3,10 @@ const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
-const verboseEventsList = require('./verbose/eventsList.js');
 const verboseDateTime = require('./verbose/dateTime.js');
 const upcomingEvents = require('./verbose/upcomingEvents.js');
 const dbReadEvents = require('./collections/events.js');
-const dbReadCommunity = require('./collections/communities.js');
+const dbReadCommunities = require('./collections/communities.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
@@ -17,7 +16,6 @@ const PINNED_MESSAGE_DATE_FORMAT = 'YYYY-MM-DD';
 const LOG_CHAT_ID = '-1001191278325';
 const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
 const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
-const DEFAULT_COMMUNITY_ID = 1;
 
 class Events4FriendsBotApp {
   /**
@@ -57,51 +55,52 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Получение информации о мероприятиях
-   */
-  _getInfo = () => {
-    const db = this._firebaseApp.firestore();
-    return dbReadEvents(db).then((events) => {
-      const message = verboseEventsList(events);
-      return message;
-    }).catch(error => {
-      console.log(error);
-      return 'Увы, произошла неизвестная ошибка. Пожалуйста, обратитесь в техническую поддержку: @frontendbasics';
-    });
-  }
-
-  /**
-   * Отправить и закрепить сообщение в чат
+   * Функция отправляет и закрепляет сообщение в чат
    *
    * @param {Object} bot
-   * @param {function} aCallback
+   * @param {Object} community
    * @private
    */
-  _sendMessageToChatAndPin(bot, aCallback) {
-    this._getInfo().then((aMessage) => {
-      bot.sendMessage(this._chatId, aMessage, {
+  _sendMessageToChatAndPin(bot, community) {
+    console.log(`Send an pin new message for ${community.name}`);
+
+    const db = this._firebaseApp.firestore();
+
+    dbReadEvents(db)
+      .then((events) => upcomingEvents(community, events))
+      .then((aMessage) => bot.sendMessage(community.chatId, aMessage, {
         parse_mode: "Markdown",
         disable_web_page_preview: true,
-      })
+      }))
       .then((data) => {
-        console.log('Message has sent');
-        if (data && data.message_id) {
-          bot.pinChatMessage(this._chatId, data.message_id, {
-            disable_notification: true
-          })
-          .then(() => {
-            console.log('Message has pinned, save pinned message ID:', data.message_id);
-            aCallback(data.message_id)
-          })
-          .catch((error) => {
-            console.log('Error pinning message:', error);
-          });
+        return bot.pinChatMessage(community.chatId, data.message_id, {
+          disable_notification: true
+        }).then((success) => ({ success, data }));
+      })
+      .then(({ success, data }) => {
+        if (success) {
+          const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+          return dbPinnedMessages.dbWritePinnedMessage(db, data.message_id, community, today)
         }
       })
       .catch((error) => {
-        console.log('Error sending message:', error);
+        console.log('Error pinning message:', error);
       });
-    });
+  }
+
+  /**
+   * Функция возвращает true, если date - сегодня
+   *
+   * NOTE!
+   * Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
+   * Сравнение даты происходит путем сравнения строк (например "2020-11-09")
+   *
+   * @param {string} date
+   * @private
+   */
+  _isToday = (date) => {
+    const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+    return today.localeCompare(date) === 0;
   }
 
   /**
@@ -115,72 +114,20 @@ class Events4FriendsBotApp {
     const that = this;
     const db = this._firebaseApp.firestore();
     dbPinnedMessages
-      .dbReadPinnedMessages(db)
-      .then((pinnedMessages) => {
-        const pinnedMessage = getPinnedMessage(pinnedMessages, DEFAULT_COMMUNITY_ID);
-
-        if (pinnedMessage) {
-          //
-          // NOTE!
-          // Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
-          // https://github.com/VadimCpp/events4friends-firestore#%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82%D0%BE%D1%80%D1%8B-%D0%B7%D0%B0%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9
-          //
-          // Сравнение даты происходит путем сравнения строк (например "2020-11-09")
-          //
-          const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
-
-          if (today.localeCompare(pinnedMessage.date) === 0) { // Текущая дата совпадает с датой закрепленного сообщения в базе данных
-
-            if (pinnedMessage.chatId && pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении найдена
-
-              that._updatePinnedMessage(bot, pinnedMessage.communityId, pinnedMessage.pinnedMessageId, () => {});
-
-            } else if (pinnedMessage.chatId && !pinnedMessage.pinnedMessageId) { // Информация о закрепленном сообщении не найдена
-              that._sendMessageToChatAndPin(bot, function (messageId) {
-                dbPinnedMessages.dbWritePinnedMessage(db, messageId, pinnedMessage.communityId, today, () => {}, () => {});
-              });
-
-            } else { // Ошибка данных в firebase
-              bot.sendMessage(
-                chatId,
-                'Не могу найти чат, к которому относится закрепленное сообщение. ' +
-                'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
-              );
-            }
-
-          } else { // Текущая дата не совпадает с датой закрепленного сообщения в базе данных.
-
-            if (pinnedMessage.chatId) { // Информация о чате сообщества найдена
-              that._sendMessageToChatAndPin(bot, function (messageId) {
-                dbPinnedMessages.dbWritePinnedMessage(db, messageId, pinnedMessage.communityId, today, () => {}, () => {});
-              });
-
-            } else { // Ошибка данных в firebase
-              bot.sendMessage(
-                chatId,
-                'Невозможно найти чат, к которому относится закрепленное сообщение. ' +
-                'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
-              );
-            }
-
+      .dbReadPinnedMessages(db).then((pinnedMessages) => {
+        return dbReadCommunities(db).then((communities) => ({communities, pinnedMessages}))
+      })
+      .then(({communities, pinnedMessages}) => {
+        communities.map((community) => {
+          const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
+          if (pinnedMessage && pinnedMessage.pinnedMessageId && this._isToday(pinnedMessage.date)) {
+            that._updatePinnedMessage(bot, community, pinnedMessage);
+          } else {
+            that._sendMessageToChatAndPin(bot, community);
           }
-
-        } else {
-          bot.sendMessage(
-            chatId,
-            'Произошла ошибка при получении информации о закрепленном сообщении. ' +
-            'Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics'
-          );
-        }
-      }
-    )
-    .catch((errorMessage) => {
-        bot.sendMessage(
-          chatId,
-          errorMessage
-        );
-      }
-    );
+        });
+      })
+      .catch((error) => bot.sendMessage(chatId, error));
   }
 
   /**
@@ -218,31 +165,33 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Обновить закрепленное сообщение.
+   * Функция обновляет закрепленное сообщение.
    *
    * @param {Object} bot
-   * @param {number} chatId
-   * @param {number} pinnedMessageId
-   * @param {function} aCallback
+   * @param {Object} community
+   * @param {Object} pinnedMessage
    * @private
    */
-  _updatePinnedMessage(bot, chatId, pinnedMessageId, aCallback) {
-    this._getInfo().then((aMessage) => {
-      bot.editMessageText(aMessage, {
-        chat_id: chatId,
-        message_id: pinnedMessageId,
+  _updatePinnedMessage(bot, community, pinnedMessage) {
+    console.log(`Update pinned message for ${community.name}`);
+
+    const db = this._firebaseApp.firestore();
+
+    dbReadEvents(db)
+      .then((events) => upcomingEvents(community, events))
+      .then((aMessage) => bot.editMessageText(aMessage, {
+        chat_id: community.chatId,
+        message_id: pinnedMessage.pinnedMessageId,
         text: aMessage,
         parse_mode: "Markdown",
         disable_web_page_preview: true,
-      })
+      }))
       .then(() => {
-        console.log('Message has edited');
-        aCallback();
+        console.log('Update pinned message - done');
       })
       .catch((error) => {
-        console.log('Failed editing message:', error);
+        console.log('Fail to update pinned message:', error);
       });
-    })
   }
 
   /**
@@ -275,7 +224,7 @@ class Events4FriendsBotApp {
    */
   handleInfoCommand(bot, msg) {
     const db = this._firebaseApp.firestore();
-    dbReadCommunity(db).then((communities) =>
+    dbReadCommunities(db).then((communities) =>
       dbReadEvents(db).then((events) => ({communities, events}))
     ).then(({communities, events}) => {
       console.log(`Got ${communities.length} communities and ${events.length} events`);
