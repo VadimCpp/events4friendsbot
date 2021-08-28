@@ -5,7 +5,9 @@ require('moment/locale/ru');
 
 const verboseEventsList = require('./verbose/eventsList.js');
 const verboseDateTime = require('./verbose/dateTime.js');
+const upcomingEvents = require('./verbose/upcomingEvents.js');
 const dbReadEvents = require('./collections/events.js');
+const dbReadCommunity = require('./collections/communities.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
@@ -265,17 +267,30 @@ class Events4FriendsBotApp {
 
   /**
    * Функция обрабатывает команду пользователя '/info'
+   * Печатает расписание для всех сообществ
    *
    * @param {Object} bot
    * @param {Object} msg
    * @public
    */
   handleInfoCommand(bot, msg) {
-    this._getInfo().then(aMessage => {
-      bot.sendMessage(msg.chat.id, aMessage, {
-        parse_mode: "Markdown",
-        disable_web_page_preview: true,
-      });
+    const db = this._firebaseApp.firestore();
+    dbReadCommunity(db).then((communities) =>
+      dbReadEvents(db).then((events) => ({communities, events}))
+    ).then(({communities, events}) => {
+      console.log(`Got ${communities.length} communities and ${events.length} events`);
+      communities.map((community) =>
+        bot.sendMessage(
+          msg.chat.id,
+          upcomingEvents(community, events),
+          {
+            parse_mode: "Markdown",
+            disable_web_page_preview: true,
+          }
+        )
+      );
+    }).catch(error => {
+      console.log(error);
     });
   }
 
