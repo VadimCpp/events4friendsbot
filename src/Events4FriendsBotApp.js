@@ -204,7 +204,7 @@ class Events4FriendsBotApp {
   handleStartCommand(bot, msg) {
     const messageText =
       'Здравствуйте, ' + getUserName(msg) + ".\n\n" +
-      'Это бот-помощник. Он следит за изменениями на сайте [events4friend.ru](https://events4friends.ru/) ' +
+      'Это бот-помощник. Он следит за изменениями на сайте [events4friends.ru](https://events4friends.ru/) ' +
       'и обновляет информацию о предстоящих мероприятиях в закрепленном сообщении чата. ' +
       'По вопросам работы бота пишите программисту [Вадиму Канинскому](https://vadimcpp.ru/?utm_source=telegram)\n\n' +
       'Посмотреть предстоящие мероприятия ➡️ /info';
