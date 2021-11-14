@@ -6,15 +6,15 @@ const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 //
 // Функция преобразовует начало мероприятия event.start в читаемый формат даты
 // Примеры работы функции:
-//   5 ноября, четверг
-//   7 ноября, суббота
-//   8 ноября, воскресенье
+//   5 нояб.
+//   7 нояб.
+//   8 нояб.
 //
 const getStartDate = (event) => {
   let startDate = 'Не указано';
 
   if (event && event.start) {
-    startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('D MMMM, dddd');
+    startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('D MMM');
   }
 
   return startDate;
@@ -41,7 +41,7 @@ const getStartTime = (event) => {
 // Функция преобразовует часовой пояс event.timezone в удобный формат для человека
 // Примеры работы функции:
 //   (Мск)
-//   (Клд) 
+//   (Клд)
 //
 const getTimezone = (event) => {
   let timezone = '';
@@ -54,16 +54,16 @@ const getTimezone = (event) => {
   }
 
   return timezone;
-}      
+}
 
 /**
  * Функция verboseDateTime возвращает время начала мероприятия в удобочитаемом формате.
  * Примеры работы функции:
- *   📅 5 ноября, четверг 🕗 17:30 (Мск)
- *   📅 7 ноября, суббота 🕗 10:00 (Клд) 
- *   📅 8 ноября, воскресенье 🕗 15:00 (Клд)
- * 
- * @param {Object} event 
+ *   5 ноя 17:30(Мск)
+ *   7 ноя 10:00(Клд)
+ *   8 ноя 15:00(Клд)
+ *
+ * @param {Object} event
  * @returns {string}
  */
 const verboseDateTime = (event) => {
@@ -71,7 +71,7 @@ const verboseDateTime = (event) => {
   const startTime = getStartTime(event);
   const timezone = getTimezone(event);
 
-  return `📅 ${startDate} 🕗 ${startTime}${timezone}`;
+  return `${startDate} ${startTime}${timezone}`;
 }
 
 module.exports = verboseDateTime;

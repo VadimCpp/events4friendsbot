@@ -14,9 +14,15 @@ const MAX_DISPLAYED_COUNT = 5;
 //
 // Предстоящие мероприятия Трава education:
 //
-// 📅 28 августа, суббота 🕗 13:00 (Мск) － English speaking club ☕️🕸 Онлайн ( Подробнее... )
+// English speaking club
+// 28 авг 13:00(Мск)
+// Онлайн
+// Подробнее...
 //
-// 📅 30 августа, понедельник 🕗 19:00 (Мск) － Дискуссионный клуб📍 Кафе «Африка», набережная реки Фонтанки, 130 ( Подробнее... )
+// Дискуссионный клуб
+// 30 авг 19:00(Мск)
+// Кафе «Африка», набережная реки Фонтанки, 130
+// Подробнее...
 //
 //
 const upcomingEvents = (community, events) => {
@@ -49,15 +55,15 @@ const upcomingEvents = (community, events) => {
       if (i < MAX_DISPLAYED_COUNT) {
         const event = events[i];
 
-        message += `${verboseDateTime(event)} － ${event.summary}`;
+        message += `*${event.summary}*\n${verboseDateTime(event)} @ `;
         if (event.isOnline) {
-            message += '🕸 Онлайн ';
+            message += 'Онлайн ';
         } else {
-            message += `📍 ${event.location} `;
+            message += `${event.location} `;
         }
-        const url = `https://events4friends.ru/#/${community.slug}/event/${event.id}`
-        message += `( [Подробнее...](${url}) )`
-        message += '\n\n'
+        const url = `https://events4friends.ru/#/${community.slug}/event/${event.id}`;
+        message += `\n[Подробнее...](${url})`;
+        message += '\n\n';
       } else {
         moreUpcomingEvents++;
       }
