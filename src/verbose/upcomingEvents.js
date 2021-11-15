@@ -55,14 +55,15 @@ const upcomingEvents = (community, events) => {
       if (i < MAX_DISPLAYED_COUNT) {
         const event = events[i];
 
-        message += `*${event.summary}*\n${verboseDateTime(event)} @ `;
+        const url = `https://events4friends.ru/#/${community.slug}/event/${event.id}`;
+        message += `*[${event.summary}](${url})*\n`
+        message += `${verboseDateTime(event)} @ `;
         if (event.isOnline) {
             message += 'Онлайн ';
         } else {
             message += `${event.location} `;
         }
-        const url = `https://events4friends.ru/#/${community.slug}/event/${event.id}`;
-        message += `\n[Ссылка ↗](${url})`;
+
         message += '\n\n';
       } else {
         moreUpcomingEvents++;
