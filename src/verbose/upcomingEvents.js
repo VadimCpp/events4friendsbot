@@ -56,7 +56,7 @@ const upcomingEvents = (community, events) => {
         const event = events[i];
 
         const url = `https://events4friends.ru/#/${community.slug}/event/${event.id}`;
-        message += `*[${event.summary}](${url})*\n`
+        message += `[${event.summary}](${url})\n`
         message += `${verboseDateTime(event)} @ `;
         if (event.isOnline) {
             message += 'Онлайн ';
