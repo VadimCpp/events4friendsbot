@@ -62,7 +62,7 @@ const upcomingEvents = (community, events) => {
             message += `${event.location} `;
         }
         const url = `https://events4friends.ru/#/${community.slug}/event/${event.id}`;
-        message += `\n[Подробнее...](${url})`;
+        message += `\n[Ссылка ↗](${url})`;
         message += '\n\n';
       } else {
         moreUpcomingEvents++;
