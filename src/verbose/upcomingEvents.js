@@ -70,7 +70,7 @@ const upcomingEvents = (community, events) => {
       }
     }
 
-    const upcomingEventsUrl = `https://events4friends.ru/#/${community.slug}/events`;
+    const upcomingEventsUrl = `https://events4friends.ru/#/${community.slug}/events?v2`;
     if (moreUpcomingEvents === 1) {
       message += `и еще [${moreUpcomingEvents} предстоящее мероприятие](${upcomingEventsUrl})...`
       message += '\n\n'
