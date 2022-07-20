@@ -11,7 +11,7 @@ const dbReadPinnedMessages = (db) => {
   })
   .catch(function(error) {
     console.warn("Error getting pinnedMessages, skip: ", error);
-    return 'Увы, произошла неизвестная ошибка. Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics';
+    throw 'Увы, произошла неизвестная ошибка. Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics';
   });
 }
 
