@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "export $(cat .env | xargs) && node index.js",
-    "start": "export $(cat .env | xargs) && node index.js"
+    "start": "export $(cat .env | xargs) && node index.js",
+    "test": "mocha --recursive",
+    "nyc": "mocha --recursive && nyc mocha --recursive"
   },
   "repository": {
     "type": "git",
@@ -13,9 +15,6 @@
   },
   "author": "Vadim Cpp",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/VadimCpp/myfirstbotbot"
-  },
   "dependencies": {
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
@@ -23,5 +22,10 @@
     "moment": "^2.24.0",
     "node-fetch": "^2.6.1",
     "node-telegram-bot-api": "^0.30.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0",
+    "nyc": "^15.1.0",
+    "pre-commit": "^1.2.2"
   }
 }
