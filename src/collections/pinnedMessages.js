@@ -5,14 +5,9 @@
  */
 const dbReadPinnedMessages = (db) => {
   return db.collection("pinnedMessages").get()
-  .then(function(querySnapshot) {
-    const pinnedMessages = querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }))
-    return pinnedMessages;
-  })
-  .catch(function(error) {
-    console.warn("Error getting pinnedMessages, skip: ", error);
-    throw 'Увы, произошла неизвестная ошибка. Обратитесь, пожалуйста, в техническую поддержку: @frontendbasics';
-  });
+    .then(function(querySnapshot) {
+      return querySnapshot.docs.map(item => ({ ...item.data(), id: item.id }));
+    });
 }
 
 /**
