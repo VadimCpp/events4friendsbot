@@ -1,7 +1,7 @@
 const assert = require('assert');
 const dbReadServices = require("../../src/collections/services");
-const db = require("./mock/db");
-const dberror = require("./mock/dberror");
+const db = require("../mocks/db");
+const dberror = require("../mocks/dberror");
 
 describe('function dbReadServices()', function () {
   it('should get services', async function () {

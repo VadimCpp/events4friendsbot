@@ -1,7 +1,7 @@
 const assert = require('assert');
 const dbReadEvents = require("../../src/collections/events");
-const db = require("./mock/db");
-const dberror = require("./mock/dberror");
+const db = require("../mocks/db");
+const dberror = require("../mocks/dberror");
 
 describe('function dbReadEvents()', function () {
   it('should get events', async function () {

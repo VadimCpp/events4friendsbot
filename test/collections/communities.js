@@ -1,7 +1,7 @@
 const assert = require('assert');
 const dbReadCommunities = require("../../src/collections/communities");
-const db = require("./mock/db");
-const dberror = require("./mock/dberror");
+const db = require("../mocks/db");
+const dberror = require("../mocks/dberror");
 
 describe('function dbReadCommunities()', function () {
   it('should get events', async function () {

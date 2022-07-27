@@ -17,6 +17,7 @@ const dbReadPinnedMessages = (db) => {
  * @param {number} msgId - номер сообщения
  * @param {object} community - сообщество
  * @param {string} date - дата в формате 'YYYY-MM-DD'
+ * @return {Promise}
  */
 const dbWritePinnedMessage = (db, msgId, community, date) => {
   return db.collection("pinnedMessages").doc(community.slug).set({

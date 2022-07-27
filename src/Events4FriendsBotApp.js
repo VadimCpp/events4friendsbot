@@ -59,33 +59,26 @@ class Events4FriendsBotApp {
    *
    * @param {Object} bot
    * @param {Object} community
-   * @private
+   * @param {Object} db
+   * @return {Promise}
+   * @public
    */
-  _sendMessageToChatAndPin(bot, community) {
+  static async sendMessageToChatAndPin(bot, community, db) {
     console.log(`Send an pin new message for ${community.name}`);
 
-    const db = this._firebaseApp.firestore();
-
-    dbReadEvents(db)
-      .then((events) => upcomingEvents(community, events))
-      .then((aMessage) => bot.sendMessage(community.chatId, aMessage, {
-        parse_mode: "Markdown",
-        disable_web_page_preview: true,
-      }))
-      .then((data) => {
-        return bot.pinChatMessage(community.chatId, data.message_id, {
-          disable_notification: true
-        }).then((success) => ({ success, data }));
-      })
-      .then(({ success, data }) => {
-        if (success) {
-          const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
-          return dbPinnedMessages.dbWritePinnedMessage(db, data.message_id, community, today)
-        }
-      })
-      .catch((error) => {
-        console.log('Error pinning message:', error);
-      });
+    const events = await dbReadEvents(db);
+    const aMessage = upcomingEvents(community, events);
+    const data = await bot.sendMessage(community.chatId, aMessage, {
+      parse_mode: "Markdown",
+      disable_web_page_preview: true,
+    })
+    const success = await bot.pinChatMessage(community.chatId, data.message_id, {
+      disable_notification: true
+    });
+    if (success) {
+      const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+      return dbPinnedMessages.dbWritePinnedMessage(db, data.message_id, community, today)
+    }
   }
 
   /**
@@ -123,7 +116,7 @@ class Events4FriendsBotApp {
           if (pinnedMessage && pinnedMessage.pinnedMessageId && this._isToday(pinnedMessage.date)) {
             that._updatePinnedMessage(bot, community, pinnedMessage);
           } else {
-            that._sendMessageToChatAndPin(bot, community);
+            that.sendMessageToChatAndPin(bot, community, this._firebaseApp.firestore());
           }
         });
       })
