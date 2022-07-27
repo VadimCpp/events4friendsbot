@@ -3,15 +3,18 @@ require('moment/locale/ru');
 
 const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
 
-//
-// Функция преобразовует начало мероприятия event.start в читаемый формат даты
-// Примеры работы функции:
-//   5 нояб.
-//   7 нояб.
-//   8 нояб.
-//
+/**
+ * Функция преобразует начало мероприятия event.start в читаемый формат даты
+ * @param event
+ * @returns {string|null}
+ *
+ * Примеры работы функции:
+ *    5 нояб.
+ *    7 нояб.
+ *    8 нояб.
+ */
 const getStartDate = (event) => {
-  let startDate = 'Не указано';
+  let startDate = null;
 
   if (event && event.start) {
     startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('D MMM');
@@ -20,15 +23,18 @@ const getStartDate = (event) => {
   return startDate;
 }
 
-//
-// Функция преобразовует начало мероприятия event.start в читаемый формат времени
-// Примеры работы функции:
-//   17:30
-//   10:00
-//   15:00
-//
+/**
+ * Функция преобразует начало мероприятия event.start в читаемый формат времени
+ * @param event
+ * @returns {string|null}
+ *
+ * Примеры работы функции:
+ *    17:30
+ *    10:00
+ *    15:00
+ */
 const getStartTime = (event) => {
-  let startDate = 'Не указано';
+  let startDate = null;
 
   if (event && event.start) {
       startDate = moment(event.start, FIREBASE_DATE_FORMAT).format('HH:mm');
@@ -37,20 +43,24 @@ const getStartTime = (event) => {
   return startDate;
 }
 
-//
-// Функция преобразовует часовой пояс event.timezone в удобный формат для человека
-// Примеры работы функции:
-//   (Мск)
-//   (Клд)
-//
+/**
+ * Функция преобразует часовой пояс event.timezone в удобный формат для человека
+ * @param event
+ * @returns {string|null}
+ *
+ * Примеры работы функции:
+ *    17:30
+ *    10:00
+ *    15:00
+ */
 const getTimezone = (event) => {
-  let timezone = '';
+  let timezone = null;
 
   if (event && event.timezone === '+0200') {
-      timezone += ' (Клд)';
+      timezone = '(Клд)';
   }
   if (event && event.timezone === '+0300') {
-      timezone += ' (Мск)';
+      timezone = '(Мск)';
   }
 
   return timezone;
@@ -59,9 +69,9 @@ const getTimezone = (event) => {
 /**
  * Функция verboseDateTime возвращает время начала мероприятия в удобочитаемом формате.
  * Примеры работы функции:
- *   5 ноя 17:30(Мск)
- *   7 ноя 10:00(Клд)
- *   8 ноя 15:00(Клд)
+ *   5 июля 17:30 (Мск)
+ *   7 июля 10:00 (Клд)
+ *   8 июля 15:00 (Клд)
  *
  * @param {Object} event
  * @returns {string}
@@ -71,7 +81,11 @@ const verboseDateTime = (event) => {
   const startTime = getStartTime(event);
   const timezone = getTimezone(event);
 
-  return `${startDate} ${startTime}${timezone}`;
+  if (!startDate || !startTime || !timezone) {
+    return 'Не указано';
+  }
+
+  return `${startDate} ${startTime} ${timezone}`;
 }
 
 module.exports = verboseDateTime;
