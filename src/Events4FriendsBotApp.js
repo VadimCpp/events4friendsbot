@@ -112,10 +112,10 @@ class Events4FriendsBotApp {
       .then(({communities, pinnedMessages}) => {
         communities.map((community) => {
           const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
-          if (pinnedMessage && pinnedMessage.pinnedMessageId && this.isToday(pinnedMessage.date)) {
+          if (pinnedMessage && pinnedMessage.pinnedMessageId && Events4FriendsBotApp.isToday(pinnedMessage.date)) {
             that._updatePinnedMessage(bot, community, pinnedMessage);
           } else {
-            that.sendMessageToChatAndPin(bot, community, this._firebaseApp.firestore());
+            Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db).then();
           }
         });
       })
