@@ -54,6 +54,29 @@ class Events4FriendsBotApp {
   }
 
   /**
+   * Функция обновляет закрепленное сообщение.
+   *
+   * @param {Object} bot
+   * @param {Object} community
+   * @param {Object} pinnedMessage
+   * @param {Object} db
+   * @public
+   */
+  static async doUpdatePinnedMessage(bot, community, pinnedMessage, db) {
+    console.log(`Update pinned message for ${community.name}`);
+
+    const events = await dbReadEvents(db);
+    const aMessage = upcomingEvents(community, events);
+    await bot.editMessageText(aMessage, {
+      chat_id: community.chatId,
+      message_id: pinnedMessage.pinnedMessageId,
+      text: aMessage,
+      parse_mode: "Markdown",
+      disable_web_page_preview: true,
+    });
+  }
+
+  /**
    * Функция отправляет и закрепляет сообщение в чат
    *
    * @param {Object} bot
@@ -113,7 +136,7 @@ class Events4FriendsBotApp {
         communities.map((community) => {
           const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
           if (pinnedMessage && pinnedMessage.pinnedMessageId && Events4FriendsBotApp.isToday(pinnedMessage.date)) {
-            that._updatePinnedMessage(bot, community, pinnedMessage);
+            Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db).then();
           } else {
             Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db).then();
           }
@@ -154,36 +177,6 @@ class Events4FriendsBotApp {
     );
 
     this._handleUpdateCommand(bot, LOG_CHAT_ID);
-  }
-
-  /**
-   * Функция обновляет закрепленное сообщение.
-   *
-   * @param {Object} bot
-   * @param {Object} community
-   * @param {Object} pinnedMessage
-   * @private
-   */
-  _updatePinnedMessage(bot, community, pinnedMessage) {
-    console.log(`Update pinned message for ${community.name}`);
-
-    const db = this._firebaseApp.firestore();
-
-    dbReadEvents(db)
-      .then((events) => upcomingEvents(community, events))
-      .then((aMessage) => bot.editMessageText(aMessage, {
-        chat_id: community.chatId,
-        message_id: pinnedMessage.pinnedMessageId,
-        text: aMessage,
-        parse_mode: "Markdown",
-        disable_web_page_preview: true,
-      }))
-      .then(() => {
-        console.log('Update pinned message - done');
-      })
-      .catch((error) => {
-        console.log('Fail to update pinned message:', error);
-      });
   }
 
   /**

@@ -8,8 +8,46 @@ const bot = require("./mocks/bot");
 const moment = require("moment");
 
 describe('class Events4FriendsBotApp', function () {
+  describe('function doUpdatePinnedMessage', function () {
+    let community = { name: "events4friends" };
+    let pinnedMessage = {};
+    it('should cause error from db', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, dberror);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause error from bot', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.doUpdatePinnedMessage(boterror, community, pinnedMessage, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause no errors', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+  });
+
   describe('function sendMessageToChatAndPin', function () {
-    let community = {};
+    let community = { name: "events4friends" };
     it('should cause error from db', async function () {
       let cbCount = 0;
       try {

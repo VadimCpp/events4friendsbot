@@ -5,6 +5,9 @@ const boterror = {
   pinChatMessage: () => {
     throw "Some error";
   },
+  editMessageText: () => {
+    throw "Some error";
+  },
 };
 
 module.exports = boterror;
