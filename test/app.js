@@ -1,11 +1,9 @@
 const assert = require('assert');
 const Events4FriendsBotApp = require("../src/Events4FriendsBotApp");
-const { PINNED_MESSAGE_DATE_FORMAT } = require("../src/constants");
 const dberror = require("./mocks/dberror");
 const db = require("./mocks/db");
 const boterror = require("./mocks/boterror");
 const bot = require("./mocks/bot");
-const moment = require("moment");
 
 describe('class Events4FriendsBotApp', function () {
   describe('function doUpdatePinnedMessage', function () {
@@ -83,16 +81,6 @@ describe('class Events4FriendsBotApp', function () {
     });
   });
 
-  describe('function isToday', function () {
-    it('should return false', function () {
-      assert.equal(Events4FriendsBotApp.isToday("1950-07-28"), false);
-    });
-    it('should return true', function () {
-      const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
-      assert.equal(Events4FriendsBotApp.isToday(today), true);
-    });
-  });
-
   describe('function doUpdateCommand', function () {
     it('should cause error from db', async function () {
       let cbCount = 0;
@@ -128,4 +116,15 @@ describe('class Events4FriendsBotApp', function () {
       assert.equal(cbCount, 0);
     });
   });
+
+  // updatePinnedMessage - Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
+  // handleStartCommand - Функция обрабатывает команду пользователя '/start'
+  // handleInfoCommand - Функция обрабатывает команду пользователя '/info'
+  // handleUpdateCommand - Функция обрабатывает команду пользователя '/update'
+  // _sendPushNotification - Команда отправляет на мобильные устройства PUSH уведомление
+  // handleRemindCommand - /remind command handler
+  // _sendTestPushNotification - Отправка тестового PUSH уведомления
+  // handleTestpushCommand - /testpush command handler
+  // handleDefault - Текст пользователю по умолчанию
+  // handleMessage - Main event handler
 });

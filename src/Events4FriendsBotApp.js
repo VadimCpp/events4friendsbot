@@ -10,12 +10,13 @@ const dbReadCommunities = require('./collections/communities.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
-const { FIREBASE_DATE_FORMAT,
+const isToday = require('./utils/isToday');
+const {
+  FIREBASE_DATE_FORMAT,
   PINNED_MESSAGE_DATE_FORMAT,
   LOG_CHAT_ID,
-  FRONTEND_BASICS_CHAT_ID,
-  EVENTS4FRIENDS_CHAT_ID,
-  VADIMCPP_ID } = require("./constants");
+  VADIMCPP_ID
+} = require("./constants");
 
 class Events4FriendsBotApp {
   /**
@@ -24,8 +25,6 @@ class Events4FriendsBotApp {
   constructor() {
     console.log('');
     console.log('[Events4FriendsBotApp]: Create Application...');
-
-    this._chatId = process.env.NODE_ENV === 'development' ? FRONTEND_BASICS_CHAT_ID : EVENTS4FRIENDS_CHAT_ID;
 
     const firebaseServiceAccount = {
       "type": "service_account",
@@ -103,21 +102,6 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Функция возвращает true, если date - сегодня
-   *
-   * NOTE!
-   * Для удобства администрирования текущая дата хранится в базе в формате YYYY-MM-DD:
-   * Сравнение даты происходит путем сравнения строк (например "2020-11-09")
-   *
-   * @param {string} date
-   * @public
-   */
-  static isToday = (date) => {
-    const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
-    return today.localeCompare(date) === 0;
-  }
-
-  /**
    * Функция обрабатывает команду пользователя '/update'
    *
    * @param {Object} bot
@@ -131,7 +115,7 @@ class Events4FriendsBotApp {
     for (let i = 0; i < communities.length; i++) {
       const community = communities[i];
       const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
-      if (pinnedMessage && pinnedMessage.pinnedMessageId && Events4FriendsBotApp.isToday(pinnedMessage.date)) {
+      if (pinnedMessage && pinnedMessage.pinnedMessageId && isToday(pinnedMessage.date)) {
         await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db);
       } else {
         await Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db);
@@ -145,6 +129,7 @@ class Events4FriendsBotApp {
    * @param {Object} bot
    * @param {Object} event данные о мероприятии
    * @param {string} userName имя администратора сайта
+   * @public
    */
   updatePinnedMessage(bot, event, userName) {
     let type = '';
