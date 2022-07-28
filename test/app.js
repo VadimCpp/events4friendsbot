@@ -1,9 +1,11 @@
 const assert = require('assert');
 const Events4FriendsBotApp = require("../src/Events4FriendsBotApp");
+const { PINNED_MESSAGE_DATE_FORMAT } = require("../src/constants");
 const dberror = require("./mocks/dberror");
 const db = require("./mocks/db");
 const boterror = require("./mocks/boterror");
 const bot = require("./mocks/bot");
+const moment = require("moment");
 
 describe('class Events4FriendsBotApp', function () {
   describe('function sendMessageToChatAndPin', function () {
@@ -42,4 +44,15 @@ describe('class Events4FriendsBotApp', function () {
       assert.equal(cbCount, 0);
     });
   });
+
+  describe('function isToday', function () {
+    it('should return false', function () {
+      assert.equal(Events4FriendsBotApp.isToday("1950-07-28"), false);
+    });
+    it('should return true', function () {
+      const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+      assert.equal(Events4FriendsBotApp.isToday(today), true);
+    });
+  });
+
 });

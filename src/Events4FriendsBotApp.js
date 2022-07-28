@@ -10,12 +10,11 @@ const dbReadCommunities = require('./collections/communities.js');
 const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
-
-const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
-const PINNED_MESSAGE_DATE_FORMAT = 'YYYY-MM-DD';
-const LOG_CHAT_ID = '-1001191278325';
-const FRONTEND_BASICS_CHAT_ID = '-1001496443397'; // https://t.me/frontendBasics
-const EVENTS4FRIENDS_CHAT_ID = '-1001396932806'; // https://t.me/events4friends
+const { FIREBASE_DATE_FORMAT,
+  PINNED_MESSAGE_DATE_FORMAT,
+  LOG_CHAT_ID,
+  FRONTEND_BASICS_CHAT_ID,
+  EVENTS4FRIENDS_CHAT_ID } = require("./constants");
 
 class Events4FriendsBotApp {
   /**
@@ -89,9 +88,9 @@ class Events4FriendsBotApp {
    * Сравнение даты происходит путем сравнения строк (например "2020-11-09")
    *
    * @param {string} date
-   * @private
+   * @public
    */
-  _isToday = (date) => {
+  static isToday = (date) => {
     const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
     return today.localeCompare(date) === 0;
   }
@@ -113,7 +112,7 @@ class Events4FriendsBotApp {
       .then(({communities, pinnedMessages}) => {
         communities.map((community) => {
           const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
-          if (pinnedMessage && pinnedMessage.pinnedMessageId && this._isToday(pinnedMessage.date)) {
+          if (pinnedMessage && pinnedMessage.pinnedMessageId && this.isToday(pinnedMessage.date)) {
             that._updatePinnedMessage(bot, community, pinnedMessage);
           } else {
             that.sendMessageToChatAndPin(bot, community, this._firebaseApp.firestore());
