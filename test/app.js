@@ -93,4 +93,39 @@ describe('class Events4FriendsBotApp', function () {
     });
   });
 
+  describe('function doUpdateCommand', function () {
+    it('should cause error from db', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.doUpdateCommand(bot, "100500", dberror);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause error from bot', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.doUpdateCommand(boterror, "100500", db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause no errors', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.doUpdateCommand(bot, "100500", db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+  });
 });

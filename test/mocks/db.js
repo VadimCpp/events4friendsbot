@@ -1,15 +1,26 @@
+const moment = require("moment");
+const { PINNED_MESSAGE_DATE_FORMAT } = require("../../src/constants");
+const today = moment().format(PINNED_MESSAGE_DATE_FORMAT);
+
 const db = {
-  collection: () => {
+  collection: (name) => {
     return {
       get: () => {
         const querySnapshot = {
           docs: [
             {
-              data: () => [],
+              data: () => (name === "pinnedMessages" ? {
+                pinnedMessageId: 1,
+                communityId: 1,
+                date: today
+              } : {}),
               id: "1",
             },
             {
-              data: () => [],
+              data: () => (name === "pinnedMessages" ? {
+                pinnedMessageId: 1,
+                date: "1950-12-01"
+              } : {}),
               id: "2",
             },
             {

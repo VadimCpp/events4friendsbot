@@ -14,7 +14,8 @@ const { FIREBASE_DATE_FORMAT,
   PINNED_MESSAGE_DATE_FORMAT,
   LOG_CHAT_ID,
   FRONTEND_BASICS_CHAT_ID,
-  EVENTS4FRIENDS_CHAT_ID } = require("./constants");
+  EVENTS4FRIENDS_CHAT_ID,
+  VADIMCPP_ID } = require("./constants");
 
 class Events4FriendsBotApp {
   /**
@@ -38,8 +39,6 @@ class Events4FriendsBotApp {
       "auth_provider_x509_cert_url": process.env.AUTH_PROVIDER_X509_CERT_URL,
       "client_x509_cert_url": process.env.CLIENT_X509_CERT_URL,
     }
-
-    this._adminId = '148045459'; // @vadimcpp
 
     /**
      * @type {Object}
@@ -123,26 +122,21 @@ class Events4FriendsBotApp {
    *
    * @param {Object} bot
    * @param {string} chatId
+   * @param {Object} db
    * @public
    */
-  _handleUpdateCommand = (bot, chatId) => {
-    const that = this;
-    const db = this._firebaseApp.firestore();
-    dbPinnedMessages
-      .dbReadPinnedMessages(db).then((pinnedMessages) => {
-        return dbReadCommunities(db).then((communities) => ({communities, pinnedMessages}))
-      })
-      .then(({communities, pinnedMessages}) => {
-        communities.map((community) => {
-          const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
-          if (pinnedMessage && pinnedMessage.pinnedMessageId && Events4FriendsBotApp.isToday(pinnedMessage.date)) {
-            Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db).then();
-          } else {
-            Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db).then();
-          }
-        });
-      })
-      .catch((error) => bot.sendMessage(chatId, error));
+  static async doUpdateCommand(bot, chatId, db) {
+    const pinnedMessages = await dbPinnedMessages.dbReadPinnedMessages(db);
+    const communities = await dbReadCommunities(db);
+    for (let i = 0; i < communities.length; i++) {
+      const community = communities[i];
+      const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
+      if (pinnedMessage && pinnedMessage.pinnedMessageId && Events4FriendsBotApp.isToday(pinnedMessage.date)) {
+        await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db);
+      } else {
+        await Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db);
+      }
+    }
   }
 
   /**
@@ -175,8 +169,8 @@ class Events4FriendsBotApp {
         disable_web_page_preview: true,
       },
     );
-
-    this._handleUpdateCommand(bot, LOG_CHAT_ID);
+    const db = this._firebaseApp.firestore();
+    Events4FriendsBotApp.doUpdateCommand(bot, LOG_CHAT_ID, db).then();
   }
 
   /**
@@ -239,7 +233,8 @@ class Events4FriendsBotApp {
    * @public
    */
   handleUpdateCommand = (bot, msg) => {
-    this._handleUpdateCommand(bot, msg.chat.id);
+    const db = this._firebaseApp.firestore();
+    Events4FriendsBotApp.doUpdateCommand(bot, msg.chat.id, db).then();
   }
 
   /**
@@ -278,7 +273,7 @@ class Events4FriendsBotApp {
   handleRemindCommand = (bot, msg) => {
     const that = this;
 
-    if (msg.chat.id == this._adminId) {
+    if (parseInt(msg.chat.id) === parseInt(VADIMCPP_ID)) {
       const db = this._firebaseApp.firestore();
 
       //
@@ -409,7 +404,7 @@ class Events4FriendsBotApp {
   handleTestpushCommand = (bot, msg) => {
     const that = this;
 
-    if (msg.chat.id == this._adminId) {
+    if (msg.chat.id == VADIMCPP_ID) {
       const db = this._firebaseApp.firestore();
 
       //
