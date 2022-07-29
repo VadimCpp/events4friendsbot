@@ -117,6 +117,61 @@ describe('class Events4FriendsBotApp', function () {
     });
   });
 
+  describe('function sendUpdateNotification', function () {
+    it('should send create notification', async function () {
+      const event = { create: true, id: 1, summary: "N/A" };
+      const userName = "John Doe";
+      let cbCount = 0;
+
+      try {
+        await Events4FriendsBotApp.sendUpdateNotification(bot, event, userName);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+    it('should send delete notification', async function () {
+      const event = { delete: true, id: 1, summary: "N/A" };
+      const userName = "John Doe";
+      let cbCount = 0;
+
+      try {
+        await Events4FriendsBotApp.sendUpdateNotification(bot, event, userName);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+    it('should send edit notification', async function () {
+      const event = { edit: true, id: 1, summary: "N/A" };
+      const userName = "John Doe";
+      let cbCount = 0;
+
+      try {
+        await Events4FriendsBotApp.sendUpdateNotification(bot, event, userName);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+    it('should cause exception', async function () {
+      const event = { edit: true, id: 1, summary: "N/A" };
+      const userName = "John Doe";
+      let cbCount = 0;
+
+      try {
+        await Events4FriendsBotApp.sendUpdateNotification(boterror, event, userName);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+  });
+
   // updatePinnedMessage - Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
   // handleStartCommand - Функция обрабатывает команду пользователя '/start'
   // handleInfoCommand - Функция обрабатывает команду пользователя '/info'

@@ -124,14 +124,14 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
+   * Этот метод отправляет рабочее уведомление в чат
    *
    * @param {Object} bot
    * @param {Object} event данные о мероприятии
    * @param {string} userName имя администратора сайта
    * @public
    */
-  updatePinnedMessage(bot, event, userName) {
+  static async sendUpdateNotification(bot, event, userName) {
     let type = '';
     if (event.create) {
       type = ' создал(а)';
@@ -146,7 +146,7 @@ class Events4FriendsBotApp {
       link = `\n[Подробнее...](https://events4friends.ru/#/event/${event.id})`;
     }
 
-    bot.sendMessage(
+    return await bot.sendMessage(
       LOG_CHAT_ID,
       `🎫 ${userName}${type}:\n${verboseDateTime(event)}\n${event.summary}${link}`,
       {
@@ -154,7 +154,19 @@ class Events4FriendsBotApp {
         disable_web_page_preview: true,
       },
     );
+  }
+
+  /**
+   * Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
+   *
+   * @param {Object} bot
+   * @param {Object} event данные о мероприятии
+   * @param {string} userName имя администратора сайта
+   * @public
+   */
+  updatePinnedMessage(bot, event, userName) {
     const db = this._firebaseApp.firestore();
+    Events4FriendsBotApp.sendUpdateNotification(bot, event, userName).then();
     Events4FriendsBotApp.doUpdateCommand(bot, LOG_CHAT_ID, db).then();
   }
 
