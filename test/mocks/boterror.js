@@ -8,6 +8,9 @@ const boterror = {
   editMessageText: () => {
     throw "Some error";
   },
+  unpinChatMessage: () => {
+    throw "Some error";
+  },
 };
 
 module.exports = boterror;

@@ -86,8 +86,14 @@ class Events4FriendsBotApp {
     for (let i = 0; i < communities.length; i++) {
       const community = communities[i];
       const pinnedMessage = getPinnedMessage(pinnedMessages, community.id);
-      if (pinnedMessage && pinnedMessage.pinnedMessageId && isToday(pinnedMessage.date)) {
-        await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db);
+      if (pinnedMessage && pinnedMessage.pinnedMessageId)
+      {
+        if (isToday(pinnedMessage.date)) {
+          await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db);
+        } else {
+          await bot.unpinChatMessage(community.chatId, {message_id: pinnedMessage.pinnedMessageId});
+          await Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db);
+        }
       } else {
         await Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db);
       }

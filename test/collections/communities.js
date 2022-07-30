@@ -6,7 +6,7 @@ const dberror = require("../mocks/dberror");
 describe('function dbReadCommunities()', function () {
   it('should get events', async function () {
     const events = await dbReadCommunities(db);
-    assert.equal(events.length, 3);
+    assert.equal(events.length, 4);
   });
   it('should get error', async function () {
     let catchCount = 0;

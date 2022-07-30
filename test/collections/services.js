@@ -6,7 +6,7 @@ const dberror = require("../mocks/dberror");
 describe('function dbReadServices()', function () {
   it('should get services', async function () {
     const services = await dbReadServices(db);
-    assert.equal(services.length, 3);
+    assert.equal(services.length, 4);
   });
   it('should get error', async function () {
     let catchCount = 0;

@@ -28,7 +28,15 @@ const db = {
                 slug: "kld"
               } : {}),
               id: "3",
-            }
+            },
+            {
+              data: () => (name === "pinnedMessages" ? {
+                pinnedMessageId: 2,
+                communityId: 2,
+                date: "1950-12-01"
+              } : {}),
+              id: "4",
+            },
           ]
         };
         return new Promise((resolve) => { resolve(querySnapshot); });
