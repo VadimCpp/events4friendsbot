@@ -182,30 +182,14 @@ class Events4FriendsBotApp {
    *
    * @param {Object} bot
    * @param {Object} msg
+   * @param {Object} db
    * @public
    */
-  handleInfoCommand(bot, msg) {
-    const db = this._firebaseApp.firestore();
-    dbReadCommunities(db).then((communities) =>
-      dbReadEvents(db).then((events) => ({communities, events}))
-    ).then(({communities, events}) => {
-      console.log(`Got ${communities.length} communities and ${events.length} events`);
-      let aMessage = 'Анонсы какого сообщества Вам интересны?\n\n';
-      communities.map((community) =>
-          aMessage += `${community.name} ➡️ /${community.slug}\n`
-      );
-      bot.sendMessage(
-        msg.chat.id,
-        aMessage
-        // upcomingEvents(community, events),
-        // {
-        //   parse_mode: "Markdown",
-        //   disable_web_page_preview: true,
-        // }
-      )
-    }).catch(error => {
-      console.log(error);
-    });
+  static async handleInfoCommand(bot, msg, db) {
+    const communities = await dbReadCommunities(db);
+    let aMessage = 'Анонсы какого сообщества Вам интересны?\n\n';
+    communities.map((community) => aMessage += `${community.name} ➡️ /${community.slug}\n`);
+    return await bot.sendMessage(msg.chat.id, aMessage);
   }
 
   /**
@@ -525,12 +509,13 @@ class Events4FriendsBotApp {
 
     const messageText = msg.text;
     const isPrivateMsg = msg.chat.id > 0;
+    const db = this._firebaseApp.firestore();
 
     if (isPrivateMsg) {
       if (messageText === '/start') {
-        this.handleStartCommand(bot, msg);
+        Events4FriendsBotApp.handleStartCommand(bot, msg).then();
       } else if (messageText === '/info') {
-        this.handleInfoCommand(bot, msg);
+        Events4FriendsBotApp.handleInfoCommand(bot, msg, db).then();
       } else if (messageText === '/update') {
         this.handleUpdateCommand(bot, msg);
       } else if (messageText === '/remind') {

@@ -198,9 +198,45 @@ describe('class Events4FriendsBotApp', function () {
     });
   });
 
+  describe('function handleInfoCommand', function () {
+    const msg = { chat: { id: 1 }};
+    it('should cause error from db', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleInfoCommand(bot, msg, dberror);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause error from bot', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleInfoCommand(boterror, msg, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause no errors', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleInfoCommand(bot, msg, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+  });
+
+
   // updatePinnedMessage - Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
-  // handleStartCommand - Функция обрабатывает команду пользователя '/start'
-  // handleInfoCommand - Функция обрабатывает команду пользователя '/info'
   // handleUpdateCommand - Функция обрабатывает команду пользователя '/update'
   // _sendPushNotification - Команда отправляет на мобильные устройства PUSH уведомление
   // handleRemindCommand - /remind command handler
