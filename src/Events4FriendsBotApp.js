@@ -1,5 +1,4 @@
 const admin = require('firebase-admin');
-const fetch = require("node-fetch");
 const moment = require('moment');
 require('moment/locale/ru');
 
@@ -12,10 +11,8 @@ const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
 const isToday = require('./utils/isToday');
 const {
-  FIREBASE_DATE_FORMAT,
   PINNED_MESSAGE_DATE_FORMAT,
-  LOG_CHAT_ID,
-  VADIMCPP_ID
+  LOG_CHAT_ID
 } = require("./constants");
 
 class Events4FriendsBotApp {
@@ -197,11 +194,10 @@ class Events4FriendsBotApp {
    *
    * @param {Object} bot
    * @param {Object} msg
+   * @param {Object} db
    * @public
    */
-  handleDefault(bot, msg) {
-    const db = this._firebaseApp.firestore();
-
+  handleDefault(bot, msg, db) {
     dbReadCommunities(db).then((communities) => {
       const aCommunity = communities.find((community) => `/${community.slug}` === msg.text);
       if (aCommunity) {
@@ -275,7 +271,7 @@ class Events4FriendsBotApp {
       } else if (messageText === '/update') {
         this.handleUpdateCommand(bot, msg);
       } else {
-        this.handleDefault(bot, msg);
+        this.handleDefault(bot, msg, db);
       }
     }
   }
