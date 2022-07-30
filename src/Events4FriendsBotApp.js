@@ -1,4 +1,3 @@
-const admin = require('firebase-admin');
 const moment = require('moment');
 require('moment/locale/ru');
 
