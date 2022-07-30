@@ -24,7 +24,9 @@ const db = {
               id: "2",
             },
             {
-              data: () => [],
+              data: () => (name === "communities" ? {
+                slug: "kld"
+              } : {}),
               id: "3",
             }
           ]

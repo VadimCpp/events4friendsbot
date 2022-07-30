@@ -235,13 +235,44 @@ describe('class Events4FriendsBotApp', function () {
     });
   });
 
+  describe('function handleDefault', function () {
+    const msg = { chat: { id: 1 }, text: "/kld"};
+    it('should cause error from db', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleDefault(bot, msg, dberror);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause error from bot', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleDefault(boterror, msg, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should cause no errors', async function () {
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleDefault(bot, msg, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+  });
 
   // updatePinnedMessage - Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
   // handleUpdateCommand - Функция обрабатывает команду пользователя '/update'
-  // _sendPushNotification - Команда отправляет на мобильные устройства PUSH уведомление
-  // handleRemindCommand - /remind command handler
-  // _sendTestPushNotification - Отправка тестового PUSH уведомления
-  // handleTestpushCommand - /testpush command handler
-  // handleDefault - Текст пользователю по умолчанию
   // handleMessage - Main event handler
 });

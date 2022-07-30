@@ -197,29 +197,23 @@ class Events4FriendsBotApp {
    * @param {Object} db
    * @public
    */
-  handleDefault(bot, msg, db) {
-    dbReadCommunities(db).then((communities) => {
-      const aCommunity = communities.find((community) => `/${community.slug}` === msg.text);
-      if (aCommunity) {
-        return dbReadEvents(db).then((events) => ({community: aCommunity, events}));
-      }
-      return { community: null };
-    }).then(({community, events}) => {
-      const aMessage = community ?
-        upcomingEvents(community, events) :
-        'Извините, не понял 🙁\nПопробуйте команду /info';
+  static async handleDefault(bot, msg, db) {
+    const communities = await dbReadCommunities(db);
+    const community = communities.find((community) => `/${community.slug}` === msg.text);
+    let message = 'Извините, не понял 🙁\nПопробуйте команду /info';
+    if (community) {
+      const events = await dbReadEvents(db);
+      message = upcomingEvents(community, events);
+    }
 
-      return bot.sendMessage(
-        msg.chat.id,
-        aMessage,
-        {
-          parse_mode: "Markdown",
-          disable_web_page_preview: true,
-        }
-      )
-    }).catch(error => {
-      console.log(error);
-    });
+    return await bot.sendMessage(
+      msg.chat.id,
+      message,
+      {
+        parse_mode: "Markdown",
+        disable_web_page_preview: true,
+      }
+    );
   }
 
   /**
@@ -271,7 +265,7 @@ class Events4FriendsBotApp {
       } else if (messageText === '/update') {
         this.handleUpdateCommand(bot, msg);
       } else {
-        this.handleDefault(bot, msg, db);
+        Events4FriendsBotApp.handleDefault(bot, msg, db).then();
       }
     }
   }
