@@ -172,6 +172,32 @@ describe('class Events4FriendsBotApp', function () {
     });
   });
 
+  describe('function handleStartCommand', function () {
+    it('should cause exception', async function () {
+      const msg = { chat: { id: 1 } };
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleStartCommand(boterror, msg);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 1);
+    });
+    it('should not cause exception', async function () {
+      const msg = { chat: { id: 1 }, from: {} };
+      let cbCount = 0;
+
+      try {
+        await Events4FriendsBotApp.handleStartCommand(bot, msg);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+  });
+
   // updatePinnedMessage - Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
   // handleStartCommand - Функция обрабатывает команду пользователя '/start'
   // handleInfoCommand - Функция обрабатывает команду пользователя '/info'

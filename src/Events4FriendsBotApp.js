@@ -157,34 +157,20 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
-   *
-   * @param {Object} bot
-   * @param {Object} event данные о мероприятии
-   * @param {string} userName имя администратора сайта
-   * @public
-   */
-  updatePinnedMessage(bot, event, userName) {
-    const db = this._firebaseApp.firestore();
-    Events4FriendsBotApp.sendUpdateNotification(bot, event, userName).then();
-    Events4FriendsBotApp.doUpdateCommand(bot, LOG_CHAT_ID, db).then();
-  }
-
-  /**
    * Функция обрабатывает команду пользователя '/start'
    *
    * @param {Object} bot
    * @param {Object} msg
    * @public
    */
-  handleStartCommand(bot, msg) {
+  static async handleStartCommand(bot, msg) {
     const messageText =
       'Здравствуйте, ' + getUserName(msg) + ".\n\n" +
       'Это бот-помощник. Он следит за изменениями на сайте [events4friends.ru](https://events4friends.ru/) ' +
       'и обновляет информацию о предстоящих мероприятиях в закрепленном сообщении чата. ' +
       'По вопросам работы бота пишите программисту [Вадиму Канинскому](https://vadimcpp.ru/?utm_source=telegram)\n\n' +
       'Посмотреть предстоящие мероприятия ➡️ /info';
-    bot.sendMessage(msg.chat.id, messageText, {
+    return await bot.sendMessage(msg.chat.id, messageText, {
       parse_mode: "Markdown",
       disable_web_page_preview: true,
     });
@@ -510,6 +496,20 @@ class Events4FriendsBotApp {
     }).catch(error => {
       console.log(error);
     });
+  }
+
+  /**
+   * Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
+   *
+   * @param {Object} bot
+   * @param {Object} event данные о мероприятии
+   * @param {string} userName имя администратора сайта
+   * @public
+   */
+  updatePinnedMessage(bot, event, userName) {
+    const db = this._firebaseApp.firestore();
+    Events4FriendsBotApp.sendUpdateNotification(bot, event, userName).then();
+    Events4FriendsBotApp.doUpdateCommand(bot, LOG_CHAT_ID, db).then();
   }
 
   /**

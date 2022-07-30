@@ -12,7 +12,7 @@ const getUserName = (msg) => {
   let uname = msg.from.username;
 
   if (fname) {
-    result = fname + (lname ? ' ' + lname : '') ;    
+    result = fname + (lname ? ' ' + lname : '') ;
   } else if (uname) {
     result = uname;
   }
