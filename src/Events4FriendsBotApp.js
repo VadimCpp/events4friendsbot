@@ -193,18 +193,6 @@ class Events4FriendsBotApp {
   }
 
   /**
-   * Функция обрабатывает команду пользователя '/update'
-   *
-   * @param {Object} bot
-   * @param {Object} msg
-   * @public
-   */
-  handleUpdateCommand = (bot, msg) => {
-    const db = this._firebaseApp.firestore();
-    Events4FriendsBotApp.doUpdateCommand(bot, msg.chat.id, db).then();
-  }
-
-  /**
    * Команда отправляет на мобильные устройства PUSH уведомление
    *
    * NOTE!
@@ -480,6 +468,18 @@ class Events4FriendsBotApp {
     }).catch(error => {
       console.log(error);
     });
+  }
+
+  /**
+   * Функция обрабатывает команду пользователя '/update'
+   *
+   * @param {Object} bot
+   * @param {Object} msg
+   * @public
+   */
+  handleUpdateCommand = (bot, msg) => {
+    const db = this._firebaseApp.firestore();
+    Events4FriendsBotApp.doUpdateCommand(bot, msg.chat.id, db).then();
   }
 
   /**
