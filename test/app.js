@@ -79,6 +79,19 @@ describe('class Events4FriendsBotApp', function () {
       }
       assert.equal(cbCount, 0);
     });
+    it('should cause no errors, but no success', async function () {
+      let cbCount = 0;
+      bot.pinChatMessage = () => false;
+      try {
+        await Events4FriendsBotApp.sendMessageToChatAndPin(bot, {}, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+      bot.pinChatMessage = () => true;
+    });
   });
 
   describe('function doUpdateCommand', function () {
@@ -146,6 +159,19 @@ describe('class Events4FriendsBotApp', function () {
     });
     it('should send edit notification', async function () {
       const event = { edit: true, id: 1, summary: "N/A" };
+      const userName = "John Doe";
+      let cbCount = 0;
+
+      try {
+        await Events4FriendsBotApp.sendUpdateNotification(bot, event, userName);
+      }
+      catch (error) {
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
+    it('should send unknown notification', async function () {
+      const event = { id: 1, summary: "N/A" };
       const userName = "John Doe";
       let cbCount = 0;
 
@@ -270,9 +296,116 @@ describe('class Events4FriendsBotApp', function () {
       }
       assert.equal(cbCount, 0);
     });
+    it('should cause no errors, but no community', async function () {
+      const msg = { chat: { id: 1 }, text: "/unknown"};
+      let cbCount = 0;
+      try {
+        await Events4FriendsBotApp.handleDefault(bot, msg, db);
+      }
+      catch (error) {
+        assert.equal(error, "Some error");
+        cbCount++;
+      }
+      assert.equal(cbCount, 0);
+    });
   });
 
-  // updatePinnedMessage - Этот метод вызывается при обновлении анонсов на сайте events4friends.ru
-  // handleUpdateCommand - Функция обрабатывает команду пользователя '/update'
-  // handleMessage - Main event handler
+  describe('function handleUpdateCommand', function () {
+    let backup;
+    let cbCount;
+    const stub = () => {
+      cbCount++;
+      return new Promise((resolve) => resolve());
+    };
+
+    before(() => {
+      cbCount = 0;
+      backup = Events4FriendsBotApp.doUpdateCommand;
+      Events4FriendsBotApp.doUpdateCommand = stub;
+    });
+    it('should call doUpdateCommand', async function () {
+      Events4FriendsBotApp.handleUpdateCommand({}, { chat: { id: 0 }}, {});
+      assert.equal(cbCount, 1);
+    });
+    after(() => {
+      cbCount = 0;
+      Events4FriendsBotApp.doUpdateCommand = stub;
+    });
+  });
+
+  describe('function updatePinnedMessage', function () {
+    let backup;
+    let cbCount;
+    const stub = () => {
+      cbCount++;
+      return new Promise((resolve) => resolve());
+    };
+
+    beforeEach(() => {
+      cbCount = 0;
+      backup = [ Events4FriendsBotApp.doUpdateCommand, Events4FriendsBotApp.sendUpdateNotification ];
+      Events4FriendsBotApp.doUpdateCommand = stub;
+      Events4FriendsBotApp.sendUpdateNotification = stub;
+    });
+    it('should call doUpdateCommand and sendUpdateNotification', async function () {
+      Events4FriendsBotApp.updatePinnedMessage();
+      assert.equal(cbCount, 2);
+    });
+    afterEach(() => {
+      cbCount = 0;
+      [ Events4FriendsBotApp.doUpdateCommand, Events4FriendsBotApp.sendUpdateNotification ] = backup;
+    });
+  });
+
+  describe('function handleMessage', function () {
+    let backup;
+    let cbCount;
+    const stub = () => {
+      cbCount++;
+      return new Promise((resolve) => resolve());
+    };
+
+    beforeEach(() => {
+      cbCount = 0;
+      backup = [
+        Events4FriendsBotApp.handleStartCommand,
+        Events4FriendsBotApp.handleInfoCommand,
+        Events4FriendsBotApp.handleUpdateCommand,
+        Events4FriendsBotApp.handleDefault,
+      ];
+      Events4FriendsBotApp.handleStartCommand = stub;
+      Events4FriendsBotApp.handleInfoCommand = stub;
+      Events4FriendsBotApp.handleUpdateCommand = stub;
+      Events4FriendsBotApp.handleDefault = stub;
+    });
+    it('should call handleStartCommand', async function () {
+      Events4FriendsBotApp.handleMessage({ text: '/start', chat: { id: 1}});
+      assert.equal(cbCount, 1);
+    });
+    it('should call handleInfoCommand', async function () {
+      Events4FriendsBotApp.handleMessage({ text: '/info', chat: { id: 1}});
+      assert.equal(cbCount, 1);
+    });
+    it('should call handleInfoCommand', async function () {
+      Events4FriendsBotApp.handleMessage({ text: '/update', chat: { id: 1}});
+      assert.equal(cbCount, 1);
+    });
+    it('should call handleDefault', async function () {
+      Events4FriendsBotApp.handleMessage({ text: 'miau', chat: { id: 1}});
+      assert.equal(cbCount, 1);
+    });
+    it('should not call any methods', async function () {
+      Events4FriendsBotApp.handleMessage({ text: 'miau', chat: { id: -100500}});
+      assert.equal(cbCount, 0);
+    });
+    afterEach(() => {
+      cbCount = 0;
+      [
+        Events4FriendsBotApp.handleStartCommand,
+        Events4FriendsBotApp.handleInfoCommand,
+        Events4FriendsBotApp.handleUpdateCommand,
+        Events4FriendsBotApp.handleDefault,
+      ] = backup;
+    });
+  });
 });

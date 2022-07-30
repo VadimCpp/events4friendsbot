@@ -17,35 +17,10 @@ const {
 
 class Events4FriendsBotApp {
   /**
-   * Конструктор
+   * Просто пустой конструктор
    */
   constructor() {
-    console.log('');
-    console.log('[Events4FriendsBotApp]: Create Application...');
-
-    const firebaseServiceAccount = {
-      "type": "service_account",
-      "project_id": "events4friends",
-      "private_key_id": process.env.PRIVATE_KEY_ID,
-      "private_key": decodeURI(process.env.PRIVATE_KEY),
-      "client_email": process.env.CLIENT_EMAIL,
-      "client_id": process.env.CLIENT_ID,
-      "auth_uri": process.env.AUTH_URI,
-      "token_uri": process.env.TOKEN_URI,
-      "auth_provider_x509_cert_url": process.env.AUTH_PROVIDER_X509_CERT_URL,
-      "client_x509_cert_url": process.env.CLIENT_X509_CERT_URL,
-    }
-
-    /**
-     * @type {Object}
-     * @private
-     */
-    this._firebaseApp = admin.initializeApp({
-      credential: admin.credential.cert(firebaseServiceAccount),
-      databaseURL: process.env.DATABASE_URL
-    }, 'events4friends-bot');
-
-    console.log(' 2️⃣  [Events4FriendsBotApp]: Connected as ' + this._firebaseApp.name);
+    // Do nothing
   }
 
   /**
@@ -221,10 +196,10 @@ class Events4FriendsBotApp {
    *
    * @param {Object} bot
    * @param {Object} msg
+   * @param {Object} db firestore database
    * @public
    */
-  handleUpdateCommand = (bot, msg) => {
-    const db = this._firebaseApp.firestore();
+  static handleUpdateCommand = (bot, msg, db) => {
     Events4FriendsBotApp.doUpdateCommand(bot, msg.chat.id, db).then();
   }
 
@@ -234,10 +209,10 @@ class Events4FriendsBotApp {
    * @param {Object} bot
    * @param {Object} event данные о мероприятии
    * @param {string} userName имя администратора сайта
+   * @param {Object} db firestore database
    * @public
    */
-  updatePinnedMessage(bot, event, userName) {
-    const db = this._firebaseApp.firestore();
+  static updatePinnedMessage(bot, event, userName, db) {
     Events4FriendsBotApp.sendUpdateNotification(bot, event, userName).then();
     Events4FriendsBotApp.doUpdateCommand(bot, LOG_CHAT_ID, db).then();
   }
@@ -247,15 +222,15 @@ class Events4FriendsBotApp {
    *
    * @param {Object} msg
    * @param {Object} bot
+   * @param {Object} db firestore database
    * @public
    */
-  handleMessage(msg, bot) {
+  static handleMessage(msg, bot, db) {
     console.log('');
     console.log(JSON.stringify(msg));
 
     const messageText = msg.text;
     const isPrivateMsg = msg.chat.id > 0;
-    const db = this._firebaseApp.firestore();
 
     if (isPrivateMsg) {
       if (messageText === '/start') {
@@ -263,7 +238,7 @@ class Events4FriendsBotApp {
       } else if (messageText === '/info') {
         Events4FriendsBotApp.handleInfoCommand(bot, msg, db).then();
       } else if (messageText === '/update') {
-        this.handleUpdateCommand(bot, msg);
+        Events4FriendsBotApp.handleUpdateCommand(bot, msg, db);
       } else {
         Events4FriendsBotApp.handleDefault(bot, msg, db).then();
       }
