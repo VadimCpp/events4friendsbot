@@ -2,9 +2,7 @@ const moment = require('moment');
 require('moment/locale/ru');
 
 const verboseDateTime = require('./dateTime.js');
-
-const FIREBASE_DATE_FORMAT_WITH_UTC = 'YYYY-MM-DDThh:mm:ssZZZZ';
-const MAX_DISPLAYED_COUNT = 5;
+const { FIREBASE_DATE_FORMAT_WITH_UTC, MAX_DISPLAYED_COUNT } = require('../constants');
 
 /**
  * Функция принимает список мероприятий из базы для конкретного сообщества и возвращает

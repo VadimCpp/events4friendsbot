@@ -9,9 +9,11 @@ const dbPinnedMessages = require('./collections/pinnedMessages.js');
 const getPinnedMessage = require('./utils/getPinnedMessage');
 const getUserName = require('./utils/getUserName');
 const isToday = require('./utils/isToday');
+const moveNextWeek = require('./utils/moveNextWeek');
 const {
   PINNED_MESSAGE_DATE_FORMAT,
-  LOG_CHAT_ID
+  LOG_CHAT_ID,
+  FIREBASE_DATE_FORMAT_WITH_UTC,
 } = require("./constants");
 
 class Events4FriendsBotApp {
@@ -196,6 +198,55 @@ class Events4FriendsBotApp {
     );
   }
 
+
+  /**
+   * Функция сохраняет мероприятие
+   *
+   * @param {Object} db - база данных firestore
+   * @param {number} event - обновленное мероприятие
+   * @return {Object}
+   */
+  static async dbUpdateEvent(db, event) {
+    return await db.collection('events')
+      .doc(event.id)
+      .update(event);
+  }
+
+  /**
+   * Переносить на следующую неделю все еженедельные мероприятия
+   *
+   * @param {Object} bot
+   * @param {Object} msg
+   * @param {Object} db
+   * @public
+   */
+  static async updateWeeklyEvents(bot, msg, db) {
+    console.log(`Update weekly events`);
+
+    let shouldUpdatePinnedMessage = false;
+    const events = await dbReadEvents(db);
+    const weeklyEvents = events.filter((e) => e && e.isWeekly);
+    console.log(`Found ${weeklyEvents.length} weekly events`);
+    const now = new Date();
+    const outdatedWeeklyEvents = weeklyEvents.filter((e) =>
+      moment(`${e.start}${e.timezone}`, FIREBASE_DATE_FORMAT_WITH_UTC).toDate() < now);
+    console.log(`Found ${outdatedWeeklyEvents.length} outdated weekly events`);
+    for (let i = 0; i < outdatedWeeklyEvents.length; i++) {
+      let outdatedEvent = outdatedWeeklyEvents[i];
+      console.log(`[${outdatedEvent.summary}]: Move ${outdatedEvent.start} next week`);
+      outdatedEvent.start = moveNextWeek(outdatedEvent.start);
+      console.log(`[${outdatedEvent.summary}]: New value ${outdatedEvent.start}`);
+      outdatedEvent.end = moveNextWeek(outdatedEvent.end);
+      shouldUpdatePinnedMessage = true;
+      await Events4FriendsBotApp.dbUpdateEvent(db, outdatedEvent);
+      await Events4FriendsBotApp.sendUpdateNotification(bot, outdatedEvent, "Бот events4friends");
+    }
+
+    if (shouldUpdatePinnedMessage) {
+      await Events4FriendsBotApp.doUpdateCommand(bot, msg.chat.id, db);
+    }
+  }
+
   /**
    * Функция обрабатывает команду пользователя '/update'
    *
@@ -247,6 +298,8 @@ class Events4FriendsBotApp {
       } else {
         Events4FriendsBotApp.handleDefault(bot, msg, db).then();
       }
+    } else {
+      Events4FriendsBotApp.updateWeeklyEvents(bot, msg, db).then();
     }
   }
 }

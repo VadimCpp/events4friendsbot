@@ -1,7 +1,7 @@
 const moment = require('moment');
 require('moment/locale/ru');
 
-const FIREBASE_DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+const { FIREBASE_DATE_FORMAT } = require('../constants');
 
 /**
  * Функция преобразует начало мероприятия event.start в читаемый формат даты
