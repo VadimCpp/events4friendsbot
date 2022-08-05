@@ -11,10 +11,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 let bot;
 if (isProduction) {
   bot = new Bot(token);
-  bot.setWebHook(process.env.HEROKU_URL + bot.token);
+  bot.setWebHook(process.env.HEROKU_URL + bot.token).then();
 } else {
   bot = new Bot(token, { polling: true });
-  bot.deleteWebHook();
+  bot.deleteWebHook().then();
 }
 
 /**
