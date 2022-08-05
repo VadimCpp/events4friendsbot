@@ -203,7 +203,7 @@ class Events4FriendsBotApp {
    * Функция сохраняет мероприятие
    *
    * @param {Object} db - база данных firestore
-   * @param {number} event - обновленное мероприятие
+   * @param {Object} event - обновленное мероприятие
    * @return {Object}
    */
   static async dbUpdateEvent(db, event) {
@@ -221,21 +221,15 @@ class Events4FriendsBotApp {
    * @public
    */
   static async updateWeeklyEvents(bot, msg, db) {
-    console.log(`Update weekly events`);
-
     let shouldUpdatePinnedMessage = false;
     const events = await dbReadEvents(db);
     const weeklyEvents = events.filter((e) => e && e.isWeekly);
-    console.log(`Found ${weeklyEvents.length} weekly events`);
     const now = new Date();
     const outdatedWeeklyEvents = weeklyEvents.filter((e) =>
       moment(`${e.start}${e.timezone}`, FIREBASE_DATE_FORMAT_WITH_UTC).toDate() < now);
-    console.log(`Found ${outdatedWeeklyEvents.length} outdated weekly events`);
     for (let i = 0; i < outdatedWeeklyEvents.length; i++) {
       let outdatedEvent = outdatedWeeklyEvents[i];
-      console.log(`[${outdatedEvent.summary}]: Move ${outdatedEvent.start} next week`);
       outdatedEvent.start = moveNextWeek(outdatedEvent.start);
-      console.log(`[${outdatedEvent.summary}]: New value ${outdatedEvent.start}`);
       outdatedEvent.end = moveNextWeek(outdatedEvent.end);
       shouldUpdatePinnedMessage = true;
       await Events4FriendsBotApp.dbUpdateEvent(db, outdatedEvent);
