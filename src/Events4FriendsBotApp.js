@@ -93,7 +93,12 @@ class Events4FriendsBotApp {
         if (isToday(pinnedMessage.date)) {
           await Events4FriendsBotApp.doUpdatePinnedMessage(bot, community, pinnedMessage, db);
         } else {
-          await bot.unpinChatMessage(community.chatId, {message_id: pinnedMessage.pinnedMessageId});
+          try {
+            await bot.unpinChatMessage(community.chatId, {message_id: pinnedMessage.pinnedMessageId});
+          }
+          catch (error) {
+            console.log('Skip unpin chat message.\n', error);
+          }
           await Events4FriendsBotApp.sendMessageToChatAndPin(bot, community, db);
         }
       } else {
